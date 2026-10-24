@@ -3,6 +3,8 @@ import FeedsWidget from './components/FeedsWidget';
 import AuditRequestForm from './components/AuditRequestForm';
 import TestimonialsSection from './components/TestimonialsSection';
 import DecisionMatrix from './components/DecisionMatrix';
+import ProcessTimeline from './components/ProcessTimeline';
+import TrustBadges from './components/TrustBadges';
 
 export const metadata = {
   title: 'DallasCircle — Hyperlocal Business Discovery',
@@ -86,6 +88,9 @@ export default function HomePage() {
 
       {/* Testimonials Section */}
       <TestimonialsSection />
+
+      {/* Trust & Security Badges */}
+      <TrustBadges />
 
       {/* What is DallasCircle */}
       <section className="px-6 py-20 bg-white">
@@ -208,6 +213,9 @@ export default function HomePage() {
       {/* Decision Matrix */}
       <DecisionMatrix />
 
+      {/* Process Timeline */}
+      <ProcessTimeline />
+
       {/* Featured Articles Section */}
       <section id="articles" className="px-6 py-20 bg-white">
         <div className="mx-auto max-w-6xl">
@@ -302,6 +310,7 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm">
                 <li><a href="/business-signup" className="hover:text-white transition">Get Listed</a></li>
                 <li><a href="/php-rescue" className="hover:text-white transition">PHP Modernization</a></li>
+                <li><a href="/faq" className="hover:text-white transition">FAQ</a></li>
               </ul>
             </div>
             <div>

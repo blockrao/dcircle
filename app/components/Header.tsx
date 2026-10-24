@@ -31,6 +31,9 @@ export default function Header() {
           <Link href="/php-rescue" className="text-slate-300 hover:text-white transition text-sm font-medium">
             Services
           </Link>
+          <Link href="/faq" className="text-slate-300 hover:text-white transition text-sm font-medium">
+            FAQ
+          </Link>
           <a href="mailto:hello@dallascircle.com" className="text-slate-300 hover:text-white transition text-sm font-medium">
             Contact
           </a>
@@ -68,6 +71,9 @@ export default function Header() {
             </Link>
             <Link href="/php-rescue" className="text-slate-300 hover:text-white transition text-sm font-medium">
               Services
+            </Link>
+            <Link href="/faq" className="text-slate-300 hover:text-white transition text-sm font-medium">
+              FAQ
             </Link>
             <a href="mailto:hello@dallascircle.com" className="text-slate-300 hover:text-white transition text-sm font-medium">
               Contact
