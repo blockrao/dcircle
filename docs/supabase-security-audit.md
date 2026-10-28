@@ -128,3 +128,5 @@ Supabase announced that new tables in the public schema will no longer be expose
 - Added public read policies that expose active categories and place-category relationships only when attached to published content; writes remain unavailable to `anon` and `authenticated`.
 - Publication guards now require an active primary category. A deferred constraint trigger validates that published places retain at least one active category and exactly one primary category at transaction commit, allowing a primary-category swap within one transaction.
 - Categories are data-model support only; do not publish category landing pages until the inventory and editorial value justify them.
+
+- Follow-up hardening: category SELECT policy is deliberately non-recursive (`is_active` only); place-category visibility still requires the associated place and neighborhood to be published. This avoids cyclic RLS policy evaluation between the two tables.
