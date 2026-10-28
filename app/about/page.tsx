@@ -15,7 +15,7 @@ export default function AboutPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">About DallasCircle</p>
         <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">A more useful way to plan a night in Deep Ellum.</h1>
         <p className="mt-6 text-lg leading-8 text-slate-600">
-          DallasCircle is being built as a focused local discovery guide for Deep Ellum, Dallas. We want to help people make practical choices around dinner, shows, late-night food, and date nights—not publish the biggest possible directory.
+          DallasCircle is a focused local discovery guide for Deep Ellum, Dallas. Our first published shortlist helps people compare practical dinner options around a night out using details sourced from the businesses themselves—not by publishing the biggest possible directory.
         </p>
 
         <section className="mt-12 border-t border-stone-200 pt-8">
