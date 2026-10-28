@@ -52,4 +52,4 @@
 - Legacy public service pages, service-specific endpoints, scanner component, and generic business API routes have been removed from this branch. Full repository reference scan and live-route checks remain outstanding.
 - The public data layer is intentionally disconnected until the actual Supabase schema, grants, RLS policies, and data quality are audited.
 - Place and editorial routes do not yet exist.
-- No local build/typecheck or live crawl has run in this workflow.
+- GitHub Actions passed locked dependency installation, lint, and production build on branch head; full route/link tests, deployed HTTP crawl, and live Supabase schema/RLS audit remain outstanding.
