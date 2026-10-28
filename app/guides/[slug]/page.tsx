@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
-export const revalidate = 3600;
 
 type PageProps = { params: Promise<{ slug: string }> };
 
 async function getPublishedGuide(slug: string) {
+  await connection();
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase
     .from("guides")
