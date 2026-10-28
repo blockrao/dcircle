@@ -41,7 +41,7 @@ Read `AGENTS.md` and the matching Next.js documentation available in the install
 - `docs/route-data-architecture-audit.md` and `docs/seo-foundation-audit.md` record the current source-level findings and outstanding verification.
 - `docs/supabase-security-audit.md` records the live database findings, applied access-hardening migrations, and remaining permissions blocker.
 
-The public database/API surface is intentionally disconnected. The live audit and the grant-hardening migrations are documented in `docs/supabase-security-audit.md`; public data routes must remain disabled until the unresolved default privileges and final RLS/public-read contract are addressed. Do not add public writes or schema migrations before that review.
+The public write/API surface remains disconnected. Server-rendered place and guide pages now use the anonymous read-only client and explicit RLS/grant contracts; no browser service-role key or public write helpers exist. The live audit and grant-hardening migrations are documented in `docs/supabase-security-audit.md`. The `supabase_admin` default-privilege blocker and missing historical migration baseline still require authorized resolution before treating database administration and future migration deployment as fully safe.
 
 ## Release rule
 
