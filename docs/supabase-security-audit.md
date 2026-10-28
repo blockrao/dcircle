@@ -110,9 +110,9 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 ## Migration-history drift
 
-The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch now has a local file for each migration version returned by Supabase. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) are present in the live schema but are not created by a tracked migration; they should be removed by the reviewed post-cutover retirement migration so a fresh database and the live database converge.
+The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch has a local file for each remote migration version. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) were created outside the tracked migration chain; a staged retirement migration now removes all 14 empty legacy business/service tables and their unused enum types so fresh and live databases can converge.
 
-Do not apply the destructive legacy-retirement migration until the new application version is deployed and the route/form dependency check is complete. The `supabase_admin` default-privilege issue remains unresolved and must be treated separately.
+The retirement migration has been committed to the branch but has **not** been applied to the live project. Apply it only after the hyperlocal-only application version is deployed and the old production route/form dependency check is complete. The `supabase_admin` default-privilege issue remains unresolved and must be treated separately.
 
 ## Rules for the new local-discovery schema
 
