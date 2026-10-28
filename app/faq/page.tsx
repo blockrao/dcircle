@@ -12,7 +12,7 @@ const questions = [
   {
     question: "What is DallasCircle?",
     answer:
-      "DallasCircle is being developed as a focused local discovery guide for planning a night out in Deep Ellum, Dallas. The initial topics are dining before a show, late-night food, and date-night planning.",
+      "DallasCircle is a focused local discovery guide for planning a night out in Deep Ellum, Dallas. Our first guide compares three dinner options using official business sources and timing details.",
   },
   {
     question: "How do you choose which businesses to include?",
