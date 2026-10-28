@@ -20,7 +20,7 @@ Legacy service endpoints and the old business API routes have been removed from 
 
 ## Validation status
 
-The branch was edited through the GitHub integration. A local dependency install, lint, typecheck, production build, deployed HTTP crawl, and Supabase RLS inspection have not run in this environment. These changes are reviewable source changes, not a production-validated release.
+GitHub Actions passed locked dependency installation, lint, and the production build on branch head `2a8b531ca7b0b7a27739b73021f7f4b431957ec7` ([run](https://github.com/blockrao/dcircle/actions/runs/40715451368)). A deployed HTTP crawl and Supabase schema/RLS inspection have not run. The passing build does not establish production routing, data security, or indexing behavior.
 
 ## Next steps
 
