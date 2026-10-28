@@ -20,7 +20,7 @@ Legacy service endpoints and the old business API routes have been removed from 
 
 ## Validation status
 
-GitHub Actions passed locked dependency installation, lint, and the production build on branch head `2a8b531ca7b0b7a27739b73021f7f4b431957ec7` ([run](https://github.com/blockrao/dcircle/actions/runs/40715451368)). A deployed HTTP crawl and Supabase schema/RLS inspection have not run. The passing build does not establish production routing, data security, or indexing behavior.
+GitHub Actions passed locked dependency installation, lint, and the production build on branch head `2a8b531ca7b0b7a27739b73021f7f4b431957ec7` ([run](https://github.com/blockrao/dcircle/actions/runs/40715451368)). A deployed HTTP crawl remains outstanding. A live Supabase audit has now confirmed 14 public tables with RLS enabled and no policies; broad anon/authenticated table grants and public function execution were revoked in two recorded migrations. The `supabase_admin` default ACL remains unresolved, and no public data API should be restored until the final access model is complete. The passing build does not establish production routing or indexing behavior.
 
 ## Next steps
 
