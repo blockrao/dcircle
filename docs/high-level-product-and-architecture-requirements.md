@@ -114,7 +114,7 @@ Priority definitions:
 - Each public page must have a single primary purpose and clear next action.
 - Mobile experience, accessibility, performance, and simple navigation are launch requirements.
 
-**Acceptance:** No contradictory PHP-modernization messaging remains on consumer-facing pages unless the business explicitly decides that service as a separate, intentionally branded offering belongs on the same domain. Every visible link is checked against a real route.
+**Acceptance:** No legacy technical-service positioning remains in the consumer-facing product. DallasCircle is exclusively a Dallas hyperlocal discovery platform; technical consulting and agency offerings are out of scope. Every visible link is checked against a real route.
 
 ### P0-B. Canonical data model
 
