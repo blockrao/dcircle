@@ -4,7 +4,7 @@
 
 ## Executive assessment
 
-DallasCircle is now positioned as a focused local discovery product for Deep Ellum, Dallas. The current public pages are the homepage, About, and FAQ. A canonical public place/guide system has not yet been implemented.
+DallasCircle is now positioned as a focused local discovery product for Deep Ellum, Dallas. The current public pages are the homepage, About, and FAQ. The canonical place/guide schema has been implemented in Supabase, but the public place and guide pages are not yet wired to it.
 
 The former business API routes and service-specific API routes have been removed from this branch. This is intentional: the source code alone did not establish that the actual Supabase schema, row-level security (RLS), or public write policies were safe. Reintroduce data routes only after the live schema and policies have been inspected and an explicit read/write contract has been agreed.
 
@@ -45,11 +45,11 @@ The target application model should include:
 - Editorial guides linked to place IDs rather than copied facts.
 - Sponsorship disclosure as a separate commercial property, never as a verification signal.
 
-The TypeScript contracts describe the target domain model only. They do not prove the production database schema matches. Inspect the real schema and data before migrations or queries.
+The core schema now exists in Supabase and is represented by `lib/local-discovery-database.types.ts`; application queries should use this narrow type contract. Legacy tables are still present but empty and access-restricted pending coordinated retirement after application cutover.
 
 ## Supabase and API risks to verify
 
-Previously inspected routes accepted broad client-supplied data for inserts or updates, and several routes exposed operational records. Those routes are now removed from this branch pending a proper replacement. This was a source-level risk, not proof of a deployed exploit.
+Previously inspected routes accepted broad client-supplied data for inserts or updates. Those routes are now removed from this branch. The live audit found 14 legacy tables with RLS enabled and no policies, all empty; broad anon/authenticated table grants and public function execution were revoked. The new schema has seven narrow read policies and no public write grants. This was a source-level/configuration risk, not proof of a deployed exploit.
 
 Before restoring public database access:
 
