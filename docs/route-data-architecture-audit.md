@@ -4,7 +4,7 @@
 
 ## Executive assessment
 
-DallasCircle is now positioned as a focused local discovery product for Deep Ellum, Dallas. The current public pages are the homepage, About, and FAQ. The canonical place/guide schema has been implemented in Supabase, but the public place and guide pages are not yet wired to it.
+DallasCircle is positioned as a focused local discovery product for Deep Ellum, Dallas. The branch includes the homepage, About, FAQ, a canonical place-profile route, and a guide route. The place/guide schema is wired to these server-rendered pages through a read-only anonymous Supabase client; the live database currently contains three published profiles and one published guide.
 
 The former business API routes and service-specific API routes have been removed from this branch. This is intentional: the source code alone did not establish that the actual Supabase schema, row-level security (RLS), or public write policies were safe. Reintroduce data routes only after the live schema and policies have been inspected and an explicit read/write contract has been agreed.
 
@@ -13,9 +13,11 @@ The former business API routes and service-specific API routes have been removed
 - `/`
 - `/about`
 - `/faq`
+- `/places/{place-slug}` — published place profiles
+- `/guides/{guide-slug}` — published editorial guides
 - A permanent redirect from the retired legacy service path to `/`
 
-The sitemap currently lists only `/`, `/about`, and `/faq`. No public place profile or guide route is currently present.
+The sitemap now derives canonical place and guide URLs from published database records, alongside `/`, `/about`, and `/faq`. Category and neighborhood landing pages remain deferred until there is enough useful inventory.
 
 ## Target canonical URL contract
 
@@ -49,7 +51,7 @@ The core schema now exists in Supabase and is represented by `lib/local-discover
 
 ## Supabase and API risks to verify
 
-Previously inspected routes accepted broad client-supplied data for inserts or updates. Those routes are now removed from this branch. The live audit found 14 legacy tables with RLS enabled and no policies, all empty; broad anon/authenticated table grants and public function execution were revoked. The new schema has seven narrow read policies and no public write grants. This was a source-level/configuration risk, not proof of a deployed exploit.
+Previously inspected routes accepted broad client-supplied data for inserts or updates. Those routes are now removed from this branch. The live audit found 14 legacy tables with RLS enabled and no policies, all empty; broad anon/authenticated table grants and public function execution were revoked. The new schema has narrow read policies and no public write grants. Place/guide pages query only published records; source/fact visibility is constrained by RLS and column-level grants. Public API write routes remain removed. This was a source-level/configuration risk, not proof of a deployed exploit.
 
 Before restoring public database access:
 
@@ -76,14 +78,12 @@ Never expose a service-role secret in browser code. A public anonymous key is on
 
 ## Validation status
 
-GitHub Actions passed locked dependency installation, lint, and production build on branch head `2a8b531ca7b0b7a27739b73021f7f4b431957ec7` ([run](https://github.com/blockrao/dcircle/actions/runs/40715451368)). Still outstanding: full route/link tests and deployed HTTP crawl. The live Supabase audit is documented in `docs/supabase-security-audit.md`: broad current grants were revoked and postgres-owned default grants were hardened, but `supabase_admin` default privileges remain unresolved. No public data API should be restored until that access model is complete. The passing build does not establish production safety or SEO behavior.
+GitHub Actions passed locked dependency installation, lint, and production build on implementation head `d763f7163eaea91a7bb8f5ccbc1f1e1878e724df` ([run](https://github.com/blockrao/dcircle/actions/runs/40721850685)). Still outstanding: route-level checks, canonical/sitemap assertions, and deployed HTTP crawl. The live Supabase audit is documented in `docs/supabase-security-audit.md`: broad current grants were revoked and postgres-owned default grants were hardened, but `supabase_admin` default privileges remain unresolved. No public data API should be restored until that access model is complete. The passing build does not establish production safety or SEO behavior.
 
 ## Recommended sequence
 
-1. Finish full source and route cleanup.
-2. Audit the actual Supabase schema, RLS, grants, and existing data.
-3. Finalize and implement the canonical place/source/fact/guide model.
-4. Build the first server-rendered Deep Ellum guide and a few source-backed place profiles.
-5. Add publication quality gates, metadata, canonical URLs, and sitemap generation.
-6. Add a low-friction correction path and newsletter only when their handling is operationally ready.
-7. Run automated checks and a separate live crawl before merging or deploying.
+1. Complete the source/reference scan and route/link audit.
+2. Resolve the authorized `supabase_admin` default-privilege blocker and recover or formally reconcile the missing historical migration baseline before using `supabase db push`.
+3. Add repeatable route, canonical, structured-data, and sitemap assertions.
+4. Verify the three place profiles and guide through the deployed site before merging/deploying.
+5. Add a low-friction correction workflow and newsletter only when their handling is operationally ready.
