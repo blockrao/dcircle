@@ -37,6 +37,37 @@ Verification after applying these migrations confirmed:
 
 The service role retains its function execution privilege. No rows or tables were deleted.
 
+## Canonical local-discovery schema implemented
+
+An additive migration created the new application model without dropping the empty legacy tables:
+
+- `neighborhoods`: publication-controlled Dallas neighborhood records; seeded with the initial `deep-ellum` record.
+- `places`: stable slug, local address, category, coordinates, neighborhood relation, price level, and publication state.
+- `place_sources` and `place_facts`: source provenance, checked dates, verification status, and review-due dates. Facts must reference a source for the same place.
+- `guides` and `guide_sources`: editorial guide content, review state, and sources.
+- `guide_places`: stable guide/place relationships, editorial rationale, and explicit sponsorship disclosure.
+
+All seven new tables have RLS enabled and one narrowly scoped public SELECT policy each. There are no anonymous/authenticated write grants. Source and fact tables use column-level SELECT grants that exclude internal notes.
+
+Publication checks enforce:
+- a place needs a published neighborhood, address, source, and at least one current verified fact before it can be published;
+- volatile verified facts such as opening/kitchen hours, menu/pricing, booking links, and event dates require a review-due date;
+- a guide needs a publication date, review date, at least one source, and at least one linked published place before publication;
+- sponsored guide/place relationships must include a non-empty disclosure.
+
+### Verification performed
+
+Read-only and transaction-rollback checks confirmed:
+- the seven new tables have RLS enabled and seven corresponding public-read policies;
+- the anonymous role can read the published Deep Ellum neighborhood;
+- a transaction-created published test place, source, and verified fact were visible to the anonymous role, while a draft place was not;
+- the anonymous role has no INSERT privilege on places and cannot select internal notes from source/fact tables;
+- a place cannot be published without a source and a current verified fact;
+- a guide cannot be published without source records and a place relationship;
+- all test rows were rolled back; no test place/guide data remains.
+
+These are database-level checks using the actual `anon` role, not a full browser/API integration test. A deployed route crawl is still outstanding.
+
 ## Remaining blocker: default privileges owned by supabase_admin
 
 The default ACL for objects created by `supabase_admin` still grants broad privileges to `anon` and `authenticated`. Attempting to change it failed with `permission denied to change default privileges`; the connected `postgres` role is not a superuser and cannot act as `supabase_admin`.
