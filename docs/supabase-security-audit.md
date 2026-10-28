@@ -18,7 +18,7 @@ These findings are a source of unnecessary exposure, but they do not establish t
 
 ## Changes applied and verified
 
-Two migrations were applied to the live project and recorded in Supabase migration history:
+Seven migrations were applied to the live project and recorded in Supabase migration history:
 
 1. `20261028152728_revoke_legacy_public_schema_grants`
    - Revoked all table privileges from `anon` and `authenticated` across existing public-schema tables.
@@ -27,15 +27,28 @@ Two migrations were applied to the live project and recorded in Supabase migrati
 
 2. `20261028152750_revoke_default_public_grants_postgres`
    - Removed automatic table, sequence, and function grants to `anon` and `authenticated` for future public-schema objects created by `postgres`.
+3. `20261028153125_create_canonical_local_discovery_schema`
+   - Added the seven canonical neighborhood/place/source/fact/guide relationship tables, safe public read grants, RLS policies, and the initial Deep Ellum neighborhood row.
+4. `20261028153221_strengthen_publication_integrity`
+   - Enforced source/place referential integrity and restricted public visibility to published neighborhoods and current verified facts.
+5. `20261028153246_require_source_backed_publication`
+   - Added publication gates for places/guides and required review dates for volatile verified facts.
+6. `20261028153544_revoke_public_trigger_function_execution`
+   - Revoked direct API execution of database trigger functions from `PUBLIC`, `anon`, and `authenticated`.
+7. `20261028153642_revoke_global_public_function_default`
+   - Removed PostgreSQL's global default `PUBLIC EXECUTE` grant for future functions created by `postgres`.
 
 Verification after applying these migrations confirmed:
 - zero table grants for `anon` across the current public-schema tables;
 - zero table grants for `authenticated`;
-- `anon` cannot execute `public.rls_auto_enable()`;
-- `authenticated` cannot execute `public.rls_auto_enable()`;
-- the `ensure_rls` event trigger remains enabled and bound to `rls_auto_enable()`.
+- `anon` and `authenticated` cannot execute `public.rls_auto_enable()` or the new trigger functions;
+- the `ensure_rls` event trigger remains enabled and bound to `rls_auto_enable()`;
+- all seven new tables have RLS enabled and one public-read policy each;
+- public reads work for a published test place/source/verified fact while a draft place remains invisible to `anon`;
+- `anon` cannot insert places and cannot select internal notes from source/fact tables;
+- place and guide publication gates passed positive and negative checks using temporary rows that were rolled back.
 
-The service role retains its function execution privilege. No rows or tables were deleted.
+The service role retains the required function privileges. No legacy rows or tables were deleted; the only new data row is the initial Deep Ellum neighborhood.
 
 ## Canonical local-discovery schema implemented
 
@@ -80,7 +93,7 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 ## Advisor findings
 
-- Supabase security advisor: 14 tables have RLS enabled but no policies. This is currently a closed posture, not a complete product access model. Add narrowly scoped policies only when the canonical place/guide model and intended roles are defined.
+- Supabase security advisor still reports 14 legacy tables with RLS enabled but no policies. This is a closed posture, not a complete product access model. The seven new local-discovery tables have reviewed public-read policies; retire the legacy tables after the application cutover.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
 - Supabase security advisor: `public.rls_auto_enable()` was executable by anonymous and authenticated roles. The current grants have been revoked and verified.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
