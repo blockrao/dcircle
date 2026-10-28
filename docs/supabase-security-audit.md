@@ -130,3 +130,5 @@ Supabase announced that new tables in the public schema will no longer be expose
 - Categories are data-model support only; do not publish category landing pages until the inventory and editorial value justify them.
 
 - Follow-up hardening: category SELECT policy is deliberately non-recursive (`is_active` only); place-category visibility still requires the associated place and neighborhood to be published. This avoids cyclic RLS policy evaluation between the two tables.
+
+- Added covering indexes for the composite `place_facts(source_id, place_id)` foreign key and `places.neighborhood_id` after the Supabase performance advisor identified the missing coverage. The advisor still reports unused indexes on empty legacy/new tables; do not prune those until the legacy schema retirement and real query patterns are known.
