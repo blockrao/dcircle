@@ -9,7 +9,7 @@ export default function Header() {
           <span>DallasCircle</span>
         </Link>
         <div className="flex items-center gap-5">
-          <Link href="/#planning-guides" className="hidden text-sm font-medium text-slate-300 transition hover:text-white sm:inline">Planning guides</Link>
+          <Link href="/guides/three-deep-ellum-dinner-stops" className="hidden text-sm font-medium text-slate-300 transition hover:text-white sm:inline">First guide</Link>
           <Link href="/about" className="hidden text-sm font-medium text-slate-300 transition hover:text-white sm:inline">Our standards</Link>
           <a href="mailto:hello@dallascircle.com?subject=DallasCircle%20correction%20or%20source" className="inline-flex items-center justify-center rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-300">Suggest a correction</a>
         </div>
