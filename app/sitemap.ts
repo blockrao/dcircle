@@ -45,10 +45,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly" as const,
   }));
 
-  return [...staticRoutes, ...placeRoutes, ...guideRoutes].map((item) => ({
-    url: `${SITE_URL}${item.route}`,
-    lastModified: "lastModified" in item ? item.lastModified : undefined,
-    changeFrequency: item.changeFrequency,
-    priority: item.priority,
-  }));
+  const routes: MetadataRoute.Sitemap = [];
+  for (const item of [...staticRoutes, ...placeRoutes, ...guideRoutes]) {
+    const lastModified =
+      "lastModified" in item && typeof item.lastModified === "string"
+        ? item.lastModified
+        : undefined;
+    routes.push({
+      url: `${SITE_URL}${item.route}`,
+      lastModified,
+      changeFrequency: item.changeFrequency,
+      priority: item.priority,
+    });
+  }
+  return routes;
 }
