@@ -99,6 +99,12 @@ The database still contains empty legacy tables, including `service_leads`, `web
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
 - Performance advisor reports unused indexes on the empty legacy schema. Do not prune them before the schema replacement plan is finalized.
 
+## Migration-history drift
+
+The live project migration history contains the pre-existing version `20261023040126_003_core_business_schema`, but its SQL file was not present in the repository when this audit began. The new migration files in this branch match the seven migrations applied during this work, but the repository still does not contain a complete historical chain for the live project.
+
+**Do not run `supabase db push` from a fresh checkout until this is reconciled.** Before using CLI migration workflows, decide whether to recover the original baseline from a trusted backup/source or establish a reviewed clean baseline after the application cutover and legacy-table retirement. Do not invent a placeholder migration that claims to reproduce the missing schema.
+
 ## Rules for the new local-discovery schema
 
 1. Keep source records, factual verification, publication status, and sponsorship status separate.
