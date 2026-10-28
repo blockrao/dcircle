@@ -78,9 +78,12 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-          <p className="mt-6 text-sm text-slate-500">
-            These are the first guide topics, not claims that a finished restaurant directory is already available.
-          </p>
+          <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-amber-800">Our first published guide</p>
+            <h3 className="mt-2 text-xl font-bold text-slate-900">Three Deep Ellum dinner stops to consider before a night out</h3>
+            <p className="mt-2 leading-7 text-slate-700">Compare three options by the timing details their own websites publish—without unsupported rankings or made-up first-hand reviews.</p>
+            <Link href="/guides/three-deep-ellum-dinner-stops" className="mt-4 inline-flex rounded-lg bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">Read the first guide</Link>
+          </div>
         </div>
       </section>
 
