@@ -18,7 +18,7 @@ These findings are a source of unnecessary exposure, but they do not establish t
 
 ## Changes applied and verified
 
-Thirteen migration versions are now represented in the live project and branch. The historical baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). The twelve subsequent migrations are also represented under `supabase/migrations/`.
+Fourteen migration versions are now represented in the live project and branch. The historical baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). The thirteen subsequent applied migrations are also represented under `supabase/migrations/`; the legacy-retirement migration is staged but not yet applied.
 
 1. `20261028152728_revoke_legacy_public_schema_grants`
    - Revoked all table privileges from `anon` and `authenticated` across existing public-schema tables.
@@ -90,11 +90,13 @@ Read-only and transaction-rollback checks confirmed:
 
 These are database-level checks using the actual `anon` role, not a full browser/API integration test. A deployed route crawl is still outstanding.
 
-## Remaining blocker: default privileges owned by supabase_admin
+## Remaining configuration issue: default privileges owned by supabase_admin
 
-The default ACL for objects created by `supabase_admin` still grants broad privileges to `anon` and `authenticated`. Attempting to change it failed with `permission denied to change default privileges`; the connected `postgres` role is not a superuser and cannot act as `supabase_admin`.
+The default ACL for objects created by `supabase_admin` still grants broad privileges to `anon` and `authenticated`. The connected role is `postgres`, not a superuser, and cannot `SET ROLE supabase_admin`; direct changes to that role's default ACL are therefore not possible through this connection.
 
-Do not describe the default-privilege hardening as complete. Resolve this using an authorized owner/admin path for `supabase_admin`, then verify the default ACL again. Until then, use explicit reviewed grants for new objects and avoid creating public-facing objects through a path that inherits the remaining defaults.
+**Mitigation applied and tested:** migration `20261028161824_harden_public_ddl_default_grants` changed the existing `ensure_rls` event-trigger function to `SECURITY INVOKER` and fail closed. When new public tables, views, sequences, functions, or procedures are created, the DDL creator (the object owner) now revokes `PUBLIC`, `anon`, and `authenticated` privileges; new tables also receive RLS. Reviewed migrations can then apply explicit, narrow grants. A live rollback test verified RLS and denied anonymous table, sequence, and function access. The event trigger remains enabled.
+
+This compensates for broad future-object defaults, but does not alter the underlying `supabase_admin` ACL. Do not claim the ACL itself is fixed. Resolve the underlying default ACL through an authorized superuser/role-owner path when available, and retain the fail-closed trigger as defense in depth.
 
 ## Legacy schema still present
 
@@ -104,7 +106,7 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 - Supabase security advisor still reports 14 legacy tables with RLS enabled but no policies. This is a closed posture, not a complete product access model. The nine new local-discovery tables have reviewed public-read policies; retire the legacy tables after the application cutover.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
-- Supabase security advisor: `public.rls_auto_enable()` was executable by anonymous and authenticated roles. The current grants have been revoked and verified.
+- Supabase security advisor: `public.rls_auto_enable()` was executable by anonymous and authenticated roles. Its grants are revoked; it is now `SECURITY INVOKER`, and the `ensure_rls` event trigger is enabled.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
 - Performance advisor reports unused indexes on the empty legacy schema. Do not prune them before the schema replacement plan is finalized.
 
@@ -112,7 +114,7 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch has a local file for each remote migration version. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) were created outside the tracked migration chain; a staged retirement migration now removes all 14 empty legacy business/service tables and their unused enum types so fresh and live databases can converge.
 
-The retirement migration has been committed to the branch but has **not** been applied to the live project. Apply it only after the hyperlocal-only application version is deployed and the old production route/form dependency check is complete. The `supabase_admin` default-privilege issue remains unresolved and must be treated separately.
+The retirement migration has been committed to the branch but has **not** been applied to the live project. Apply it only after the hyperlocal-only application version is deployed and the old production route/form dependency check is complete. The underlying `supabase_admin` default ACL remains unresolved even though the new-object DDL guard mitigates its effective impact.
 
 ## Rules for the new local-discovery schema
 
