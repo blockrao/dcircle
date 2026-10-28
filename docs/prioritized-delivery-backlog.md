@@ -50,6 +50,6 @@
 ## Current blockers
 
 - Legacy public service pages, service-specific endpoints, scanner component, and generic business API routes have been removed from this branch. Full repository reference scan and live-route checks remain outstanding.
-- The public data layer is intentionally disconnected until the actual Supabase schema, grants, RLS policies, and data quality are audited.
+- The public data layer remains intentionally disconnected. Initial live audit found 14 public tables with RLS enabled but no policies; current anon/authenticated grants and postgres-owned default grants were hardened. The `supabase_admin` default ACL still needs an authorized fix before the access model is complete. See `docs/supabase-security-audit.md`.
 - Place and editorial routes do not yet exist.
 - GitHub Actions passed locked dependency installation, lint, and production build on branch head; full route/link tests, deployed HTTP crawl, and live Supabase schema/RLS audit remain outstanding.
