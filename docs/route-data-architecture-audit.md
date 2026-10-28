@@ -78,7 +78,7 @@ Never expose a service-role secret in browser code. A public anonymous key is on
 
 ## Validation status
 
-GitHub Actions passed locked dependency installation, lint, and production build on implementation head `d763f7163eaea91a7bb8f5ccbc1f1e1878e724df` ([run](https://github.com/blockrao/dcircle/actions/runs/40721850685)). Still outstanding: route-level checks, canonical/sitemap assertions, and deployed HTTP crawl. The live Supabase audit is documented in `docs/supabase-security-audit.md`: broad current grants were revoked and postgres-owned default grants were hardened, but `supabase_admin` default privileges remain unresolved. No public data API should be restored until that access model is complete. The passing build does not establish production safety or SEO behavior.
+GitHub Actions passed locked dependency installation, lint, and production build on implementation head `d763f7163eaea91a7bb8f5ccbc1f1e1878e724df` ([run](https://github.com/blockrao/dcircle/actions/runs/40721850685)). Added `scripts/verify-live-routes.mjs` (`npm run check:live`) to check status codes, canonical links, JSON-LD, correction/source context, sitemap membership, and the retired-path redirect. It has not been run against a preview because this branch is not deployed; broader internal-link/robots checks and the deployed HTTP crawl remain outstanding. The live Supabase audit is documented in `docs/supabase-security-audit.md`: broad current grants were revoked and postgres-owned default grants were hardened, but `supabase_admin` default privileges remain unresolved. No public data API should be restored until that access model is complete. The passing build does not establish production safety or SEO behavior.
 
 ## Recommended sequence
 
