@@ -30,6 +30,8 @@ npm ci
 npm run lint
 npm run build
 npm run dev
+# After deploying a preview or production build:
+SITE_URL=https://your-preview-domain.example npm run check:live
 ```
 
 Read `AGENTS.md` and the matching Next.js documentation available in the installed package before making framework changes. Check `package.json` for the scripts actually available in this checkout.
@@ -44,5 +46,7 @@ Read `AGENTS.md` and the matching Next.js documentation available in the install
 The public write/API surface remains disconnected. Server-rendered place and guide pages now use the anonymous read-only client and explicit RLS/grant contracts; no browser service-role key or public write helpers exist. The live audit and grant-hardening migrations are documented in `docs/supabase-security-audit.md`. The `supabase_admin` default-privilege blocker and missing historical migration baseline still require authorized resolution before treating database administration and future migration deployment as fully safe.
 
 ## Release rule
+
+Use `scripts/verify-live-routes.mjs` via `npm run check:live` against a deployed preview or production URL to check HTTP status, canonical tags, JSON-LD, source/correction context, sitemap inclusion, and the retired-path redirect. Do not run it against the old production deployment and treat failure as a code regression before deploying this branch.
 
 Do not describe changes as production-ready or deployed unless type/lint/build checks, route/link checks, security checks, and live HTTP validation have actually run. Keep unrun checks visible in the pull request.
