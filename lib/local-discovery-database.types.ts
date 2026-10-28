@@ -18,6 +18,75 @@ export type LocalDiscoveryDatabase = {
   };
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      place_categories: {
+        Row: {
+          category_id: string
+          created_at: string
+          is_primary: boolean
+          place_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          is_primary?: boolean
+          place_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          is_primary?: boolean
+          place_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "place_categories_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       neighborhoods: {
         Row: {
           city: string
@@ -61,7 +130,6 @@ export type LocalDiscoveryDatabase = {
         Row: {
           address_line1: string | null
           address_line2: string | null
-          category: string
           city: string
           created_at: string
           id: string
@@ -84,7 +152,6 @@ export type LocalDiscoveryDatabase = {
         Insert: {
           address_line1?: string | null
           address_line2?: string | null
-          category: string
           city?: string
           created_at?: string
           id?: string
@@ -107,7 +174,6 @@ export type LocalDiscoveryDatabase = {
         Update: {
           address_line1?: string | null
           address_line2?: string | null
-          category?: string
           city?: string
           created_at?: string
           id?: string
