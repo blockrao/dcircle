@@ -119,3 +119,12 @@ The live project migration history contains the pre-existing version `2026102304
 ## Related platform change
 
 Supabase announced that new tables in the public schema will no longer be exposed to the Data and GraphQL APIs automatically, with enforcement on existing projects scheduled for 2026-10-30. The new model should use explicit, reviewed grants rather than relying on implicit API exposure: https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically
+
+
+## Category normalization — 28 October 2026
+
+- Added `categories` and `place_categories`; seeded the seven existing category concepts as normalized category records.
+- Backfilled any existing `places.category` values to the relationship table, then removed the legacy single-value column. The live `places` table was empty at migration time, so no place assignments were lost.
+- Added public read policies that expose active categories and place-category relationships only when attached to published content; writes remain unavailable to `anon` and `authenticated`.
+- Publication guards now require an active primary category. A deferred constraint trigger validates that published places retain at least one active category and exactly one primary category at transaction commit, allowing a primary-category swap within one transaction.
+- Categories are data-model support only; do not publish category landing pages until the inventory and editorial value justify them.
