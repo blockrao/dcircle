@@ -1,15 +1,16 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'FAQ - DallasCircle PHP Modernization',
+  title: "Frequently Asked Questions",
   description:
-    "Frequently asked questions about DallasCircle's PHP to Next.js migration service. Learn about our 2-week process, pricing, and security.",
+    "How DallasCircle researches local places, handles corrections, and separates editorial coverage from clearly labelled sponsorships.",
+  alternates: { canonical: "/faq" },
   openGraph: {
-    title: 'FAQ - DallasCircle PHP Modernization',
+    title: "Frequently Asked Questions | DallasCircle",
     description:
-      "Frequently asked questions about DallasCircle's PHP to Next.js migration service.",
-    url: 'https://dallascircle.com/faq',
-    type: 'website',
+      "How DallasCircle researches local places, handles corrections, and separates editorial coverage from clearly labelled sponsorships.",
+    url: "https://dallascircle.com/faq",
+    type: "website",
   },
 };
 
