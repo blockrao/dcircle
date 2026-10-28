@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DallasCircle
 
-## Getting Started
+**DallasCircle — Deep Ellum for the night out.**
 
-First, run the development server:
+DallasCircle is a remote-first, editorial-led local discovery platform for Dallas, Texas. The initial product focuses on Deep Ellum: practical guides and researched place profiles that help people plan dinner before a show, find late-night options, and plan date nights.
+
+The product must not imply firsthand visits or publish unsupported claims. Use reliable public sources, prefer official business and venue information, record verification dates for changing facts, and label paid placements clearly.
+
+## Product boundaries
+
+- Start with Deep Ellum and the night-out use case.
+- Build a small, useful, source-backed product before expanding geography or categories.
+- Keep place facts, source provenance, editorial content, publication state, and sponsorship status distinct.
+- Do not build merchant dashboards, claims workflows, marketplace features, or broad directory coverage before demand justifies them.
+- Do not include technical consulting, software services, or agency offerings in the product.
+
+## Technology
+
+- Next.js App Router and TypeScript
+- Tailwind CSS
+- Supabase/PostgreSQL, after schema and RLS validation
+- Vercel deployment
+
+## Development
+
+Install dependencies and run the available checks:
 
 ```bash
+npm ci
+npm run lint
+npm run build
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Read `AGENTS.md` and the matching Next.js documentation available in the installed package before making framework changes. Check `package.json` for the scripts actually available in this checkout.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture and delivery
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `docs/high-level-product-and-architecture-requirements.md` defines the product and technical direction.
+- `docs/prioritized-delivery-backlog.md` defines sequencing and acceptance gates.
+- `docs/route-data-architecture-audit.md` and `docs/seo-foundation-audit.md` record the current source-level findings and outstanding verification.
 
-## Learn More
+The public database/API surface is intentionally not exposed while the actual Supabase schema and RLS policies remain unverified. Do not add public writes or schema migrations until that audit is complete.
 
-To learn more about Next.js, take a look at the following resources:
+## Release rule
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Do not describe changes as production-ready or deployed unless type/lint/build checks, route/link checks, security checks, and live HTTP validation have actually run. Keep unrun checks visible in the pull request.
