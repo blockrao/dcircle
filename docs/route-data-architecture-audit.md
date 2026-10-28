@@ -83,7 +83,7 @@ GitHub Actions passed locked dependency installation, lint, and production build
 ## Recommended sequence
 
 1. Complete the source/reference scan and route/link audit.
-2. Resolve the authorized `supabase_admin` default-privilege blocker and recover or formally reconcile the missing historical migration baseline before using `supabase db push`.
+2. Resolve the `supabase_admin` default-privilege blocker through an authorized superuser/role-owner path. The missing historical baseline has now been restored from the live migration record.
 3. Add repeatable route, canonical, structured-data, and sitemap assertions.
 4. Verify the three place profiles and guide through the deployed site before merging/deploying.
 5. Add a low-friction correction workflow and newsletter only when their handling is operationally ready.
