@@ -18,7 +18,7 @@ These findings are a source of unnecessary exposure, but they do not establish t
 
 ## Changes applied and verified
 
-Twelve migrations were applied to the live project during this work and recorded in Supabase migration history (in addition to the pre-existing remote-only baseline):
+Thirteen migration versions are now represented in the live project and branch. The historical baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). The twelve subsequent migrations are also represented under `supabase/migrations/`.
 
 1. `20261028152728_revoke_legacy_public_schema_grants`
    - Revoked all table privileges from `anon` and `authenticated` across existing public-schema tables.
@@ -110,9 +110,9 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 ## Migration-history drift
 
-The live project migration history contains the pre-existing version `20261023040126_003_core_business_schema`, but its SQL file was not present in the repository when this audit began. The new migration files in this branch match the twelve migrations applied during this work, but the repository still does not contain a complete historical chain for the live project.
+The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch now has a local file for each migration version returned by Supabase. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) are present in the live schema but are not created by a tracked migration; they should be removed by the reviewed post-cutover retirement migration so a fresh database and the live database converge.
 
-**Do not run `supabase db push` from a fresh checkout until this is reconciled.** Before using CLI migration workflows, decide whether to recover the original baseline from a trusted backup/source or establish a reviewed clean baseline after the application cutover and legacy-table retirement. Do not invent a placeholder migration that claims to reproduce the missing schema.
+Do not apply the destructive legacy-retirement migration until the new application version is deployed and the route/form dependency check is complete. The `supabase_admin` default-privilege issue remains unresolved and must be treated separately.
 
 ## Rules for the new local-discovery schema
 
