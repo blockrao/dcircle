@@ -76,7 +76,7 @@ Never expose a service-role secret in browser code. A public anonymous key is on
 
 ## Validation status
 
-Not yet run: local install, lint, typecheck, production build, full route/link tests, deployed HTTP crawl, or live Supabase schema/RLS inspection. No production safety or SEO result should be inferred from the current source edits alone.
+GitHub Actions passed locked dependency installation, lint, and production build on branch head `2a8b531ca7b0b7a27739b73021f7f4b431957ec7` ([run](https://github.com/blockrao/dcircle/actions/runs/40715451368)). Still outstanding: full route/link tests, deployed HTTP crawl, and live Supabase schema/RLS inspection. The passing build does not establish production safety or SEO behavior.
 
 ## Recommended sequence
 
