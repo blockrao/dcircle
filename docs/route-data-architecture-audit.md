@@ -1,92 +1,89 @@
 # DallasCircle route and data architecture audit
 
-**Scope:** source-code review of `main` as inspected on 2026-10-28. This is not a live production crawl; the browsing tool could not retrieve the production domain, and a local build was not run.
+**Scope:** source-code review of `seo/technical-foundation` on 2026-10-28. Not a live production crawl or database audit.
 
 ## Executive assessment
 
-The repository has the beginnings of a business directory data model, but the public URL architecture is not yet implemented as a crawlable directory. The existing pages are primarily a PHP-modernization marketing site, while homepage metadata and content also describe hyperlocal discovery. This mismatch is a product/IA problem before it is a metadata problem.
+DallasCircle is now positioned as a focused local discovery product for Deep Ellum, Dallas. The current public pages are the homepage, About, and FAQ. A canonical public place/guide system has not yet been implemented.
 
-The `Business` interface includes `id`, `name`, `category`, `address`, `latitude`, `longitude`, `verified`, and timestamps. However, it does not define a stable public slug, city/neighborhood relations, opening hours, media, source attribution, review provenance, or a clear published/indexable status. The `EditorialContent` interface includes `slug`, but no public editorial route was found in the inspected route tree.
+The former business API routes and service-specific API routes have been removed from this branch. This is intentional: the source code alone did not establish that the actual Supabase schema, row-level security (RLS), or public write policies were safe. Reintroduce data routes only after the live schema and policies have been inspected and an explicit read/write contract has been agreed.
 
-## Observed route and data findings
-
-### Public routes found in source
+## Current route inventory from source
 
 - `/`
 - `/about`
 - `/faq`
-- `/php-rescue`
+- A permanent redirect from the retired legacy service path to `/`
 
-### Homepage links requiring route verification
+The sitemap currently lists only `/`, `/about`, and `/faq`. No public place profile or guide route is currently present.
 
-The homepage links to paths such as `/search?category=...`, `/categories`, `/business-signup`, and `/articles/php-modernization-case-study`. Corresponding page files were not found at the expected App Router paths on `main`. That means these routes are absent from the inspected source tree at those locations; only a deployed HTTP test can determine whether they are currently served by rewrites or another deployment configuration.
+## Target canonical URL contract
 
-The feed API returns six hard-coded article entries whose `/articles/...` links do not correspond to an article route in the inspected tree. This risks sending users and crawlers to missing pages and makes the feed a non-authoritative content source.
-
-### Business data and API risks
-
-- `Business` has no stable public slug; using a mutable business name or opaque database UUID as the main public URL would create poor usability and migration risk.
-- `/api/businesses` returns up to 50 rows from `businesses`, optionally filtering by name substring and category. It does not show explicit public-publication filtering, pagination, stable sorting, or field-level projection in the inspected code.
-- The same API exposes a POST insert of the submitted JSON into `businesses`. The route itself does not demonstrate validation, authentication, or authorization checks. Confirm Supabase Row Level Security and server-side policies before treating this endpoint as safe.
-- `lib/supabase.ts` uses the public anon key, which is normal only when database policies correctly enforce access. The source code alone does not establish whether the deployed database policies are safe.
-- `verified` is a boolean on the business record, but field-level provenance and verification history are separate structures. Public trust labels should only be shown when the verification process is defined, auditable, and accurately represented.
-- No public business-profile page or category landing page was found in the inspected route tree.
-
-## Proposed public URL contract — subject to product confirmation
-
-For a hyperlocal discovery product, prefer durable, readable URLs based on public entities. Do not publish these routes until their corresponding pages and data rules exist.
+Do not publish these URL families until the corresponding pages, records, and publication rules exist.
 
 | Page type | Proposed pattern | Indexing rule |
 |---|---|---|
-| Home | `/` | Index if it clearly communicates the product |
-| Business profile | `/businesses/{business-slug}` | Index only if the listing is real, sufficiently complete, and publicly viewable |
-| Category landing page | `/categories/{category-slug}` | Index only when it has useful curated results and unique intro/context |
-| Neighborhood landing page | `/neighborhoods/{neighborhood-slug}` | Index only for supported geographies with useful local inventory |
-| Category + neighborhood | `/neighborhoods/{neighborhood-slug}/{category-slug}` | Add selectively; avoid creating every possible thin combination |
-| Editorial guide | `/guides/{article-slug}` | Index only when the article is published, original, attributed, and useful |
+| Home | `/` | Index when it clearly describes the product |
+| Place profile | `/places/{place-slug}` | Published, sufficiently complete, canonical, and source-backed |
+| Neighborhood page | `/neighborhoods/{neighborhood-slug}` | Supported geography with useful local inventory |
+| Category page | `/categories/{category-slug}` | Curated inventory and distinct editorial context |
+| Editorial guide | `/guides/{guide-slug}` | Published, original, attributed, and useful |
+| Guide/place relationship | Canonical links, not duplicate pages | Relationship must be useful and based on stable IDs |
 
-Do not use both query-string and path variants as competing indexable pages. Search/filter result states should generally be non-indexable unless promoted into a deliberately designed landing page with stable canonical rules.
+Avoid indexable query-string filters by default. Promote a filter to a landing page only when it serves a distinct user need and has enough useful, maintainable content.
 
-## Minimum data contract before generating SEO pages
+## Canonical place contract
 
-For business profiles, establish:
-- immutable internal ID and unique normalized public slug;
-- name, primary category, full address, supported locality/neighborhood, and map coordinates;
-- canonical business website and contact details where permitted;
-- opening hours and special hours only when source-backed;
-- image/media rights and meaningful alt text;
-- record status: draft, published, hidden, duplicate, closed, or under review;
-- field-level source, last-checked timestamp, and verification method for factual claims;
-- merchant-claim status distinct from factual verification;
-- review source and permission/provenance if reviews are ever displayed.
+The target application model should include:
 
-For editorial content, establish:
-- unique slug, title, summary, body, author/editor, publish and modified timestamps;
-- explicit status and publication date policy;
-- source citations and editorial review process for factual claims;
-- related business entities through stable IDs, with sponsorship disclosure where applicable.
+- Immutable internal ID and unique, stable public slug.
+- Name, category, locality, neighborhood relation, and verified address.
+- Optional coordinates, website, contact details, price context, and other relevant public facts.
+- Explicit publication status, separate from factual verification and any future business relationship.
+- Field-level source reference, verification state, checked timestamp, and review-due date for changing facts.
+- Source records with canonical URL, publisher/type, access date, and notes.
+- Editorial guides linked to place IDs rather than copied facts.
+- Sponsorship disclosure as a separate commercial property, never as a verification signal.
 
-## Rendering and search-engine requirements
+The TypeScript contracts describe the target domain model only. They do not prove the production database schema matches. Inspect the real schema and data before migrations or queries.
 
-- Render primary business facts and meaningful internal links in the initial server response. Client-side API fetching may support interactive filters, but should not be the only way crawlers discover core content.
-- Generate page-specific titles, descriptions, canonical URLs, Open Graph metadata, and appropriate structured data from the same authoritative record used for visible content.
-- Only emit `LocalBusiness` or a more specific subtype when the page actually represents that business and its visible content supports the properties. A directory page should not impersonate the listed business.
-- Add dynamic sitemap entries only for published, canonical pages that return 200. Exclude drafts, duplicates, internal search states, empty categories, and unavailable/closed records unless there is a deliberate useful closure page.
-- Use 301 redirects when changing established public URLs; keep a durable old-to-new mapping and test for chains and loops.
-- Ensure page links are ordinary crawlable anchors and that important links do not depend solely on click handlers.
+## Supabase and API risks to verify
 
-## Recommended order of work
+Previously inspected routes accepted broad client-supplied data for inserts or updates, and several routes exposed operational records. Those routes are now removed from this branch pending a proper replacement. This was a source-level risk, not proof of a deployed exploit.
 
-1. Confirm one primary product proposition and launch geography; remove the current PHP-service/discovery ambiguity.
-2. Crawl the deployed domain and test every internal link, redirect, canonical, robots, and sitemap response. The current environment could not fetch the live domain, so this remains outstanding.
-3. Audit Supabase schema, RLS policies, data completeness, duplicates, provenance, and public publication state.
-4. Define and implement stable slugs plus business-profile pages before expanding the sitemap.
-5. Build category/neighborhood landing pages only where inventory and editorial context justify them.
-6. Add server-rendered editorial pages and remove hard-coded feed links until the linked routes exist.
-7. Add structured data and sitemap generation from published canonical entities, then validate with build checks and external rich-result/schema tools.
+Before restoring public database access:
 
-## Current confidence boundaries
+1. Inventory tables, columns, constraints, indexes, views, grants, and functions.
+2. Inspect RLS enablement and policies table by table.
+3. Check whether anonymous users can read non-public records or write arbitrary values.
+4. Separate public reads from authenticated editorial writes.
+5. Define validation, rate limiting, error handling, and field projection.
+6. Test with anonymous and authenticated roles using the real project configuration.
+7. Add migrations only after preserving existing data and confirming backward compatibility.
 
-Confirmed by repository source inspection: listed routes and interfaces, hard-coded feed records, API query shape, and the absence of the expected page files on `main`.
+Never expose a service-role secret in browser code. A public anonymous key is only appropriate when RLS and grants correctly constrain it.
 
-Not yet verified: production HTTP status codes, deployed Supabase RLS policies, real data quality/counts, indexation state, Search Console performance, and whether hosting rewrites serve paths not represented in the repository route tree.
+## Rendering and indexing requirements
+
+- Render meaningful place/guide facts and links in the initial server response.
+- Use the same canonical record for visible facts, metadata, structured data, and sitemap eligibility.
+- Include only published canonical pages that return 200 and pass page-type completeness checks.
+- Exclude drafts, hidden records, duplicates, internal search states, and empty category pages.
+- Add self-referencing canonical metadata and unique title/description for indexable pages.
+- Use structured data only when it accurately represents the visible content and page entity.
+- Keep a durable redirect map; test old URLs, chains, and loops.
+- Ensure primary navigation and related links are ordinary crawlable anchors.
+
+## Validation status
+
+Not yet run: local install, lint, typecheck, production build, full route/link tests, deployed HTTP crawl, or live Supabase schema/RLS inspection. No production safety or SEO result should be inferred from the current source edits alone.
+
+## Recommended sequence
+
+1. Finish full source and route cleanup.
+2. Audit the actual Supabase schema, RLS, grants, and existing data.
+3. Finalize and implement the canonical place/source/fact/guide model.
+4. Build the first server-rendered Deep Ellum guide and a few source-backed place profiles.
+5. Add publication quality gates, metadata, canonical URLs, and sitemap generation.
+6. Add a low-friction correction path and newsletter only when their handling is operationally ready.
+7. Run automated checks and a separate live crawl before merging or deploying.
