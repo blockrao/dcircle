@@ -14,8 +14,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DallasCircle — Hyperlocal Business Discovery",
-  description: "Discover the best local businesses in Dallas. Search restaurants, services, and local personalities. Built for Dallas, by Dallas.",
+  metadataBase: new URL("https://dallascircle.com"),
+  title: {
+    default: "DallasCircle — Hyperlocal Business Discovery",
+    template: "%s | DallasCircle",
+  },
+  description:
+    "Discover local businesses, restaurants, and services in Dallas and the DFW community.",
+  openGraph: {
+    type: "website",
+    siteName: "DallasCircle",
+    locale: "en_US",
+    title: "DallasCircle — Hyperlocal Business Discovery",
+    description:
+      "Discover local businesses, restaurants, and services in Dallas and the DFW community.",
+    url: "https://dallascircle.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DallasCircle — Hyperlocal Business Discovery",
+    description:
+      "Discover local businesses, restaurants, and services in Dallas and the DFW community.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
