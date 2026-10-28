@@ -6,6 +6,8 @@ import type { Json } from "@/lib/local-discovery-database.types";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 
+export const instant = false;
+
 type PageProps = { params: Promise<{ slug: string }> };
 
 async function getPublishedPlace(slug: string) {
