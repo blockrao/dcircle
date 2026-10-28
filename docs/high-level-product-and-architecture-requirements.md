@@ -258,7 +258,7 @@ Add events and multi-stop night plans only when official source availability and
 
 ### P2-C. Merchant software and broader platform
 
-Consider claim management, paid recurring merchant products, website visibility audits, review/reputation workflows, additional categories, or a broader marketplace only after repeat use and willingness to pay demonstrate a real need. These are not launch blockers.
+Consider lightweight business correction tools, paid recurring merchant products, additional local categories, or a broader marketplace only after repeat use and willingness to pay demonstrate a real need. These are not launch blockers.
 
 ---
 
