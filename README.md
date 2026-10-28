@@ -39,8 +39,9 @@ Read `AGENTS.md` and the matching Next.js documentation available in the install
 - `docs/high-level-product-and-architecture-requirements.md` defines the product and technical direction.
 - `docs/prioritized-delivery-backlog.md` defines sequencing and acceptance gates.
 - `docs/route-data-architecture-audit.md` and `docs/seo-foundation-audit.md` record the current source-level findings and outstanding verification.
+- `docs/supabase-security-audit.md` records the live database findings, applied access-hardening migrations, and remaining permissions blocker.
 
-The public database/API surface is intentionally not exposed while the actual Supabase schema and RLS policies remain unverified. Do not add public writes or schema migrations until that audit is complete.
+The public database/API surface is intentionally disconnected. The live audit and the grant-hardening migrations are documented in `docs/supabase-security-audit.md`; public data routes must remain disabled until the unresolved default privileges and final RLS/public-read contract are addressed. Do not add public writes or schema migrations before that review.
 
 ## Release rule
 
