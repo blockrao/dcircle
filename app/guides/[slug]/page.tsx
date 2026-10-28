@@ -5,6 +5,8 @@ import { connection } from "next/server";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 
+export const instant = false;
+
 type PageProps = { params: Promise<{ slug: string }> };
 
 async function getPublishedGuide(slug: string) {
