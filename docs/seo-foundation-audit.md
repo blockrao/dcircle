@@ -10,9 +10,9 @@ Legacy service endpoints and the old business API routes have been removed from 
 
 ## Findings still requiring work
 
-1. **No canonical place/guide route family exists yet.** Implement stable slugs and route contracts before publishing place or guide URLs.
+1. **No canonical place/guide route family exists yet.** The database schema is ready, but implement stable route contracts and server-rendered pages before publishing place or guide URLs.
 2. **No publication-gated content pipeline exists yet.** Drafts, hidden records, duplicates, closed places, and published content must be treated distinctly.
-3. **No database-backed public directory is wired yet.** Inspect the actual Supabase schema, data quality, grants, and RLS policies before implementing queries or migrations.
+3. **The database-backed directory is not wired into pages yet.** The canonical schema and seven public-read policies exist; resolve the remaining `supabase_admin` default ACL and then implement typed server-side reads against the new tables.
 4. **Sitemap eligibility must share one source of truth with page rendering.** Only published, canonical, sufficiently complete pages returning 200 should be included.
 5. **Primary content must be server-rendered.** Client-side fetching may support interaction but must not be the only way crawlers can discover essential content.
 6. **Every indexable page needs unique metadata and a stable canonical.** Avoid thin filter combinations and duplicate query-string variants.
@@ -24,9 +24,9 @@ GitHub Actions passed locked dependency installation, lint, and the production b
 
 ## Next steps
 
-1. Complete the source and route inventory.
-2. Inspect actual Supabase tables, constraints, grants, RLS, and existing data.
-3. Agree the canonical place, fact/source, guide, and publication-state contract.
+1. Finish the source and route inventory, including live-route validation.
+2. Resolve the `supabase_admin` default-privilege blocker and coordinate retirement of empty legacy tables after application cutover.
+3. Wire typed queries to the canonical place, source/fact, guide, and publication model.
 4. Implement one server-rendered guide and a small number of individually researched place profiles.
 5. Add page metadata, canonical URLs, structured data supported by visible content, and a publication-gated sitemap.
 6. Automate route, link, metadata, sitemap, and redirect checks; then validate the deployed domain separately.
