@@ -10,10 +10,10 @@ async function getPage(path) {
 }
 
 function assertCanonical(html, path) {
-  const tags = html.match(/<link\\b[^>]*>/g) ?? [];
-  const canonicalTag = tags.find((tag) => /\\brel="canonical"/.test(tag));
+  const tags = html.match(/<link\b[^>]*>/g) ?? [];
+  const canonicalTag = tags.find((tag) => /\brel="canonical"/.test(tag));
   assert.ok(canonicalTag, `Missing canonical link for ${path}`);
-  const href = canonicalTag.match(/\\bhref="([^"]+)"/)?.[1];
+  const href = canonicalTag.match(/\bhref="([^"]+)"/)?.[1];
   assert.equal(href, new URL(path, base).href, `Wrong canonical URL for ${path}`);
 }
 
