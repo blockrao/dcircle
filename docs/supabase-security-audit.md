@@ -18,7 +18,7 @@ These findings are a source of unnecessary exposure, but they do not establish t
 
 ## Changes applied and verified
 
-Seven migrations were applied to the live project and recorded in Supabase migration history:
+Twelve migrations were applied to the live project during this work and recorded in Supabase migration history (in addition to the pre-existing remote-only baseline):
 
 1. `20261028152728_revoke_legacy_public_schema_grants`
    - Revoked all table privileges from `anon` and `authenticated` across existing public-schema tables.
@@ -37,30 +37,39 @@ Seven migrations were applied to the live project and recorded in Supabase migra
    - Revoked direct API execution of database trigger functions from `PUBLIC`, `anon`, and `authenticated`.
 7. `20261028153642_revoke_global_public_function_default`
    - Removed PostgreSQL's global default `PUBLIC EXECUTE` grant for future functions created by `postgres`.
+8. `20261028155106_normalize_place_categories`
+   - Added `categories` and `place_categories`, backfilled any legacy values, removed the single-category column, and added category publication guards.
+9. `20261028155132_defer_category_integrity_checks`
+   - Made published-place category integrity checks deferred until transaction commit and prevented deactivating categories linked to published places.
+10. `20261028155220_avoid_category_policy_recursion`
+   - Replaced a recursive category read policy with a non-recursive active-category policy.
+11. `20261028155434_index_local_discovery_foreign_keys`
+   - Added indexes for the composite place-fact/source foreign key and neighborhood foreign key.
+12. `20261028155619_seed_first_deep_ellum_editorial_slice`
+   - Seeded three source-backed place profiles, verified hours/kitchen facts with review dates, one guide, source records, and guide/place relationships.
 
 Verification after applying these migrations confirmed:
-- zero table grants for `anon` across the current public-schema tables;
-- zero table grants for `authenticated`;
+- no table-level INSERT/UPDATE/DELETE grants for `anon` or `authenticated` on the canonical content tables; explicit SELECT grants are limited to public content, with column-level projections for source/fact/relationship tables;
 - `anon` and `authenticated` cannot execute `public.rls_auto_enable()` or the new trigger functions;
 - the `ensure_rls` event trigger remains enabled and bound to `rls_auto_enable()`;
-- all seven new tables have RLS enabled and one public-read policy each;
+- all nine new tables have RLS enabled and one public-read policy each;
 - public reads work for a published test place/source/verified fact while a draft place remains invisible to `anon`;
 - `anon` cannot insert places and cannot select internal notes from source/fact tables;
 - place and guide publication gates passed positive and negative checks using temporary rows that were rolled back.
 
-The service role retains the required function privileges. No legacy rows or tables were deleted; the only new data row is the initial Deep Ellum neighborhood.
+The service role retains the required function privileges. No legacy rows or tables were deleted. The canonical schema now contains the published Deep Ellum neighborhood, three published place profiles, one published guide, and their source/fact/category/guide relationships.
 
 ## Canonical local-discovery schema implemented
 
 An additive migration created the new application model without dropping the empty legacy tables:
 
 - `neighborhoods`: publication-controlled Dallas neighborhood records; seeded with the initial `deep-ellum` record.
-- `places`: stable slug, local address, category, coordinates, neighborhood relation, price level, and publication state.
+- `places`: stable slug, local address, coordinates, neighborhood relation, price level, and publication state; normalized categories live in `categories` and `place_categories`.
 - `place_sources` and `place_facts`: source provenance, checked dates, verification status, and review-due dates. Facts must reference a source for the same place.
 - `guides` and `guide_sources`: editorial guide content, review state, and sources.
 - `guide_places`: stable guide/place relationships, editorial rationale, and explicit sponsorship disclosure.
 
-All seven new tables have RLS enabled and one narrowly scoped public SELECT policy each. There are no anonymous/authenticated write grants. Source and fact tables use column-level SELECT grants that exclude internal notes.
+All nine new tables have RLS enabled and one narrowly scoped public SELECT policy each. There are no anonymous/authenticated write grants. Source and fact tables use column-level SELECT grants that exclude internal notes.
 
 Publication checks enforce:
 - a place needs a published neighborhood, address, source, and at least one current verified fact before it can be published;
@@ -71,7 +80,7 @@ Publication checks enforce:
 ### Verification performed
 
 Read-only and transaction-rollback checks confirmed:
-- the seven new tables have RLS enabled and seven corresponding public-read policies;
+- the nine new tables have RLS enabled and nine corresponding public-read policies;
 - the anonymous role can read the published Deep Ellum neighborhood;
 - a transaction-created published test place, source, and verified fact were visible to the anonymous role, while a draft place was not;
 - the anonymous role has no INSERT privilege on places and cannot select internal notes from source/fact tables;
@@ -93,7 +102,7 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 ## Advisor findings
 
-- Supabase security advisor still reports 14 legacy tables with RLS enabled but no policies. This is a closed posture, not a complete product access model. The seven new local-discovery tables have reviewed public-read policies; retire the legacy tables after the application cutover.
+- Supabase security advisor still reports 14 legacy tables with RLS enabled but no policies. This is a closed posture, not a complete product access model. The nine new local-discovery tables have reviewed public-read policies; retire the legacy tables after the application cutover.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
 - Supabase security advisor: `public.rls_auto_enable()` was executable by anonymous and authenticated roles. The current grants have been revoked and verified.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
@@ -101,7 +110,7 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 ## Migration-history drift
 
-The live project migration history contains the pre-existing version `20261023040126_003_core_business_schema`, but its SQL file was not present in the repository when this audit began. The new migration files in this branch match the seven migrations applied during this work, but the repository still does not contain a complete historical chain for the live project.
+The live project migration history contains the pre-existing version `20261023040126_003_core_business_schema`, but its SQL file was not present in the repository when this audit began. The new migration files in this branch match the twelve migrations applied during this work, but the repository still does not contain a complete historical chain for the live project.
 
 **Do not run `supabase db push` from a fresh checkout until this is reconciled.** Before using CLI migration workflows, decide whether to recover the original baseline from a trusted backup/source or establish a reviewed clean baseline after the application cutover and legacy-table retirement. Do not invent a placeholder migration that claims to reproduce the missing schema.
 
