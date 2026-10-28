@@ -5,7 +5,6 @@ import { createPublicSupabaseClient } from "@/lib/supabase";
 const SITE_URL = "https://dallascircle.com";
 
 // Sitemap eligibility follows the same published-record contract as the pages.
-export const instant = false;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
