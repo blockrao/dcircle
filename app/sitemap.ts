@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 const SITE_URL = "https://dallascircle.com";
 
 // Sitemap eligibility follows the same published-record contract as the pages.
-export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await connection();
   const supabase = createPublicSupabaseClient();
   const [placesResult, guidesResult] = await Promise.all([
     supabase
