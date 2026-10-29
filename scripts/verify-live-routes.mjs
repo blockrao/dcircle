@@ -179,16 +179,27 @@ for (const sitemapUrl of sitemapUrls) {
 
 const internalPaths = new Set([...crawledHtml.values()].flatMap(getLocalLinkPaths));
 for (const path of internalPaths) {
-  const response = await getResponse(path);
-  assert.ok(
-    [200, 301, 308].includes(response.status),
-    `Internal link ${path} should return 200 or a permanent redirect; got ${response.status}`,
-  );
-  if ([301, 308].includes(response.status)) {
+  let currentUrl = new URL(path, base);
+  const visited = new Set();
+  let response = await getResponse(currentUrl);
+
+  for (let hop = 0; [301, 308].includes(response.status); hop += 1) {
+    assert.ok(hop < 5, `Internal link ${path} exceeded the maximum of five redirects.`);
+    assert.ok(!visited.has(currentUrl.href), `Internal link ${path} contains a redirect loop at ${currentUrl.href}`);
+    visited.add(currentUrl.href);
+
     const location = response.headers.get("location");
-    assert.ok(location, `Redirect from ${path} must include a Location header.`);
-    assert.notEqual(new URL(location, base).pathname, path, `Redirect from ${path} must not loop to itself.`);
+    assert.ok(location, `Redirect from ${currentUrl.pathname} must include a Location header.`);
+    currentUrl = new URL(location, currentUrl);
+    assert.ok(!visited.has(currentUrl.href), `Internal link ${path} redirects in a loop to ${currentUrl.href}`);
+    response = await getResponse(currentUrl);
   }
+
+  assert.equal(
+    response.status,
+    200,
+    `Internal link ${path} must resolve to HTTP 200 within five redirects; got ${response.status} at ${currentUrl.pathname}`,
+  );
 }
 
 const retiredPath = "/php-rescue";
