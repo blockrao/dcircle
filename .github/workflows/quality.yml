@@ -18,9 +18,9 @@ concurrency:
 
 jobs:
   lint-and-build:
-    name: Lint and production build
+    name: Lint, build, and route verification
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -42,3 +42,49 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Verify required Supabase Actions secrets
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ] || [ -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
+            echo "::error::Configure repository Actions secrets NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before route verification can run."
+            exit 1
+          fi
+
+      - name: Start production server and verify routes, SEO, and internal links
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          LOG_FILE="$RUNNER_TEMP/dcircle-next-start.log"
+          npm run start > "$LOG_FILE" 2>&1 &
+          SERVER_PID=$!
+          cleanup() {
+            kill "$SERVER_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          READY=0
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://localhost:3000/ > /dev/null; then
+              READY=1
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "::error::Production server exited before becoming ready."
+              cat "$LOG_FILE"
+              exit 1
+            fi
+            sleep 2
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "::error::Production server did not become ready within 60 seconds."
+            cat "$LOG_FILE"
+            exit 1
+          fi
+
+          SITE_URL=http://localhost:3000 CANONICAL_SITE_URL=https://dallascircle.com npm run check:live
