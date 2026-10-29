@@ -1,6 +1,6 @@
 # DallasCircle — Price-Level Evidence and Editorial Method
 
-**Status:** Editorial operating standard proposed for use with the existing `places.price_level` field  
+**Status:** Adopted editorial operating standard for the existing `places.price_level` field  
 **Scope:** Published place profiles and Explore filtering  
 **Safety rule:** This process is read-only until a separately reviewed content update is approved. Never infer or write a price level from a venue category, neighborhood, reputation, or a single non-representative menu item.
 
@@ -8,7 +8,7 @@
 
 The price-level filter should help a person compare likely spend, not imply that DallasCircle knows an exact bill. Price levels are editorial summaries derived from current, attributable menu evidence. They are not a guarantee, and tax, tip, alcohol, special events, and changing menu prices can affect the final spend.
 
-## Proposed level bands
+## Adopted level bands
 
 Use the approximate expected spend for one adult ordering a representative individual meal, before tax and tip:
 
@@ -37,7 +37,7 @@ Research performed 29 October 2026. These findings are research notes, not datab
 
 | Place | Public official evidence found | Evidence conclusion | Database action |
 | --- | --- | --- | --- |
-| Serious Pizza | [Official menu](https://www.seriouspizza.com/menus/) lists a huge slice at $5.75, build-your-own pizzas at $16.75 / $24.25 / $32.50 by size, specialty pizzas at $21.25 / $32.75 / $43.50 by size, and fountain drinks at $3. | Strong current menu-price evidence. Whole-pie sizes are not individual portions; the huge slice plus a drink is a representative individual order under the proposed $15 threshold. Confirm current applicability to the Dallas location and document the solo-order basis before editorial approval. | Keep null pending reviewed content update. |
+| Serious Pizza | [Official menu](https://www.seriouspizza.com/menus/) lists a huge slice at $5.75, build-your-own pizzas at $16.75 / $24.25 / $32.50 by size, specialty pizzas at $21.25 / $32.75 / $43.50 by size, and fountain drinks at $3. The official Dallas location page is [here](https://www.seriouspizza.com/location/dallas/). | A huge slice plus a $3 fountain drink totals $8.75 before tax/tip, which fits Level 1 under the adopted bands. This is a plausible solo-order example, not proof of average spend; check whether the menu is current and applicable to the Dallas location and document the chosen representative order before editorial approval. Whole-pie prices are not individual portions. | Keep null pending reviewed content update and provenance recording. |
 | Pecan Lodge | [Official website](https://pecanlodge.com/) and [official in-house menu PDF](https://pecanlodge.com/wp-content/uploads/2024/09/PCL-menu-sep-24-2024.pdf) provide venue/menu context, but the located in-house menu is dated September 2024. Current official shop/catering prices are not equivalent to a current individual dine-in meal. | No sufficiently current, representative dine-in price evidence confirmed in this research pass. | Keep null. Find current official dine-in menu/ordering prices before review. |
 | Armoury D.E. | [Official website](https://armouryde.com/) and [official menus page](https://armouryde.com/home/menus/) establish the food/drink offering, but a complete current priced menu could not be verified from the official pages in this pass. | Menu prices and a representative solo spend remain unverified. | Keep null. Seek a current official menu or direct confirmation before review. |
 
@@ -50,8 +50,7 @@ Research performed 29 October 2026. These findings are research notes, not datab
 
 ## Follow-up work
 
-1. Confirm the level bands as the product's operating convention.
-2. Review the Serious Pizza solo-order evidence and source it in the canonical record if accepted.
-3. Obtain current official individual-meal pricing for Pecan Lodge and Armoury D.E.
-4. Add an explicit menu-price fact/source record if the current schema supports it; otherwise propose a schema change separately rather than hiding menu-price evidence in unrelated fact fields.
-5. After approved updates, rerun the read-only coverage audit and confirm the Explore filter displays only evidence-backed values.
+1. Review the Serious Pizza solo-order evidence and source it in the canonical record if accepted.
+2. Obtain current official individual-meal pricing for Pecan Lodge and Armoury D.E.
+3. Add an explicit menu-price fact/source record if the current schema supports it; otherwise propose a schema change separately rather than hiding menu-price evidence in unrelated fact fields.
+4. After approved updates, rerun the read-only coverage audit and confirm the Explore filter displays only evidence-backed values.
