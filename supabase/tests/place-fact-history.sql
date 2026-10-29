@@ -11,27 +11,34 @@ DECLARE
   test_source_id uuid;
   test_fact_id uuid;
   history_count integer;
-  history_row public.place_fact_history%ROWTYPE;
+  history_row dcircle_private.place_fact_history%ROWTYPE;
 BEGIN
-  IF has_table_privilege('anon', 'public.place_fact_history', 'SELECT')
-    OR has_table_privilege('anon', 'public.place_fact_history', 'INSERT')
-    OR has_table_privilege('anon', 'public.place_fact_history', 'UPDATE')
-    OR has_table_privilege('anon', 'public.place_fact_history', 'DELETE')
-    OR has_table_privilege('authenticated', 'public.place_fact_history', 'SELECT')
-    OR has_table_privilege('authenticated', 'public.place_fact_history', 'INSERT')
-    OR has_table_privilege('authenticated', 'public.place_fact_history', 'UPDATE')
-    OR has_table_privilege('authenticated', 'public.place_fact_history', 'DELETE')
-    OR has_table_privilege('service_role', 'public.place_fact_history', 'SELECT')
-    OR has_table_privilege('service_role', 'public.place_fact_history', 'INSERT')
-    OR has_table_privilege('service_role', 'public.place_fact_history', 'UPDATE')
-    OR has_table_privilege('service_role', 'public.place_fact_history', 'DELETE')
+  IF has_schema_privilege('anon', 'dcircle_private', 'USAGE')
+    OR has_schema_privilege('authenticated', 'dcircle_private', 'USAGE')
+    OR has_schema_privilege('service_role', 'dcircle_private', 'USAGE')
+  THEN
+    RAISE EXCEPTION 'Public API roles must not have usage on the private audit schema';
+  END IF;
+
+  IF has_table_privilege('anon', 'dcircle_private.place_fact_history', 'SELECT')
+    OR has_table_privilege('anon', 'dcircle_private.place_fact_history', 'INSERT')
+    OR has_table_privilege('anon', 'dcircle_private.place_fact_history', 'UPDATE')
+    OR has_table_privilege('anon', 'dcircle_private.place_fact_history', 'DELETE')
+    OR has_table_privilege('authenticated', 'dcircle_private.place_fact_history', 'SELECT')
+    OR has_table_privilege('authenticated', 'dcircle_private.place_fact_history', 'INSERT')
+    OR has_table_privilege('authenticated', 'dcircle_private.place_fact_history', 'UPDATE')
+    OR has_table_privilege('authenticated', 'dcircle_private.place_fact_history', 'DELETE')
+    OR has_table_privilege('service_role', 'dcircle_private.place_fact_history', 'SELECT')
+    OR has_table_privilege('service_role', 'dcircle_private.place_fact_history', 'INSERT')
+    OR has_table_privilege('service_role', 'dcircle_private.place_fact_history', 'UPDATE')
+    OR has_table_privilege('service_role', 'dcircle_private.place_fact_history', 'DELETE')
   THEN
     RAISE EXCEPTION 'Public API roles must not have direct access to place_fact_history';
   END IF;
 
-  IF has_function_privilege('anon', 'public.capture_place_fact_history()', 'EXECUTE')
-    OR has_function_privilege('authenticated', 'public.capture_place_fact_history()', 'EXECUTE')
-    OR has_function_privilege('service_role', 'public.capture_place_fact_history()', 'EXECUTE')
+  IF has_function_privilege('anon', 'dcircle_private.capture_place_fact_history()', 'EXECUTE')
+    OR has_function_privilege('authenticated', 'dcircle_private.capture_place_fact_history()', 'EXECUTE')
+    OR has_function_privilege('service_role', 'dcircle_private.capture_place_fact_history()', 'EXECUTE')
   THEN
     RAISE EXCEPTION 'API roles must not be able to execute the history trigger function directly';
   END IF;
@@ -62,7 +69,7 @@ BEGIN
   WHERE id = test_fact_id;
 
   SELECT count(*) INTO history_count
-  FROM public.place_fact_history
+  FROM dcircle_private.place_fact_history
   WHERE fact_id = test_fact_id AND operation = 'UPDATE';
 
   IF history_count <> 1 THEN
@@ -70,7 +77,7 @@ BEGIN
   END IF;
 
   SELECT * INTO history_row
-  FROM public.place_fact_history
+  FROM dcircle_private.place_fact_history
   WHERE fact_id = test_fact_id AND operation = 'UPDATE'
   ORDER BY changed_at DESC
   LIMIT 1;
@@ -86,7 +93,7 @@ BEGIN
   DELETE FROM public.place_facts WHERE id = test_fact_id;
 
   SELECT count(*) INTO history_count
-  FROM public.place_fact_history
+  FROM dcircle_private.place_fact_history
   WHERE fact_id = test_fact_id AND operation = 'DELETE';
 
   IF history_count <> 1 THEN
@@ -94,7 +101,7 @@ BEGIN
   END IF;
 
   SELECT * INTO history_row
-  FROM public.place_fact_history
+  FROM dcircle_private.place_fact_history
   WHERE fact_id = test_fact_id AND operation = 'DELETE'
   ORDER BY changed_at DESC
   LIMIT 1;
