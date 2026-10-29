@@ -6,6 +6,10 @@ DallasCircle is a remote-first, editorial-led local discovery platform for Dalla
 
 The product must not imply firsthand visits or publish unsupported claims. Use reliable public sources, prefer official business and venue information, record verification dates for changing facts, and label paid placements clearly.
 
+## Strategic baseline
+
+The product and architecture decision record is [`docs/vision-and-strategic-direction.md`](docs/vision-and-strategic-direction.md). It defines the vision, mission, intended SEO/discoverability advantage, architecture choice, repository reuse policy, and release priorities. The detailed requirements and delivery documents must remain consistent with it.
+
 ## Product boundaries
 
 - Start with Deep Ellum and the night-out use case.
@@ -56,7 +60,8 @@ Read `AGENTS.md` and the matching Next.js documentation available in the install
 
 ## Architecture and delivery
 
-- `docs/high-level-product-and-architecture-requirements.md` defines the product and technical direction.
+- `docs/vision-and-strategic-direction.md` is the authoritative strategic direction and architecture decision baseline.
+- `docs/high-level-product-and-architecture-requirements.md` defines detailed product and technical requirements consistent with that baseline.
 - `docs/prioritized-delivery-backlog.md` defines sequencing and acceptance gates.
 - `docs/route-data-architecture-audit.md` and `docs/seo-foundation-audit.md` record the current source-level findings and outstanding verification.
 - `docs/supabase-security-audit.md` records the live database findings, applied access-hardening migrations, and remaining permissions blocker.
