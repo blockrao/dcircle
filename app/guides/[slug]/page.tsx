@@ -22,7 +22,19 @@ async function getPublishedGuide(slug: string) {
     .maybeSingle();
 
   if (error) throw new Error(`Unable to load guide: ${error.message}`);
-  return data;
+  if (!data) return null;
+
+  // A reviewed timestamp alone does not make a useful guide. Require at least
+  // one visible source and one currently published place relationship.
+  const [sourcesResult, linksResult] = await Promise.all([
+    supabase.from("guide_sources").select("id").eq("guide_id", data.id).limit(1),
+    supabase.from("guide_places").select("place_id").eq("guide_id", data.id).limit(1),
+  ]);
+
+  if (sourcesResult.error || linksResult.error) {
+    throw new Error("Unable to verify the publication requirements for this guide.");
+  }
+  return sourcesResult.data?.length && linksResult.data?.length ? data : null;
 }
 
 function displayDate(value: string) {
