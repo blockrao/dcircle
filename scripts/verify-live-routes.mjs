@@ -216,6 +216,17 @@ for (const path of placePaths) {
   assertPageMetadata(html, path);
   assertSchemaType(html, path, ["Restaurant", "BarOrPub", "LocalBusiness"]);
   assertCanonicalEntityIds(html, path);
+  const placeSchemas = getJsonLd(html, path);
+  const placeSchema = placeSchemas.find((block) => ["Restaurant", "BarOrPub", "LocalBusiness"].some((type) => {
+    const schemaType = block["@type"];
+    return Array.isArray(schemaType) ? schemaType.includes(type) : schemaType === type;
+  }));
+  assert.ok(placeSchema, `Missing local-business entity schema on ${path}`);
+  assert.equal(
+    new URL(typeof placeSchema.mainEntityOfPage === "string" ? placeSchema.mainEntityOfPage : placeSchema.mainEntityOfPage?.["@id"], canonicalBase).href,
+    canonicalUrl(path),
+    `Place schema mainEntityOfPage must identify the canonical DallasCircle profile on ${path}`,
+  );
   assert.ok(html.includes("hello@dallascircle.com"), `${path} should expose the correction contact.`);
   assert.ok(html.includes("Source checked"), `${path} should show source freshness context.`);
   assert.ok(html.includes(guidePath), `${path} should link to the relevant published guide when the place is featured in it.`);

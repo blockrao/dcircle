@@ -152,7 +152,10 @@ export default async function PlacePage({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": schemaType,
     "@id": `https://dallascircle.com/places/${place.slug}`,
+    mainEntityOfPage: `https://dallascircle.com/places/${place.slug}`,
     name: place.name,
+    // Keep the business's official website distinct from DallasCircle's
+    // canonical page for this entity.
     url: place.website_url ?? `https://dallascircle.com/places/${place.slug}`,
     description: place.summary ?? undefined,
     telephone: place.phone ?? undefined,
