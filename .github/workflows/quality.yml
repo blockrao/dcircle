@@ -2,11 +2,14 @@ name: Quality checks
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - foundation/place-fact-history-reconciled
   push:
     branches:
       - main
       - "seo/**"
+      - test/place-fact-history-postgres-ci
   workflow_dispatch:
 
 permissions:
