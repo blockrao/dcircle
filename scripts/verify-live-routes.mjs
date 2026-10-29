@@ -75,6 +75,27 @@ function assertSchemaType(html, label, expectedTypes) {
   );
 }
 
+function assertCanonicalEntityIds(html, path) {
+  const expectedUrl = canonicalUrl(path);
+  const blocks = getJsonLd(html, path);
+  const entityIds = blocks.map((block) => block["@id"]).filter((value) => typeof value === "string");
+
+  assert.ok(entityIds.length > 0, `Missing stable JSON-LD @id on ${path}`);
+  for (const entityId of entityIds) {
+    const parsed = new URL(entityId, canonicalBase);
+    assert.equal(parsed.href, expectedUrl, `JSON-LD @id must match the canonical page URL on ${path}`);
+    assert.equal(parsed.origin, canonicalBase.origin, `JSON-LD @id must use canonical origin on ${path}`);
+    assert.ok(!parsed.href.toLowerCase().includes("praveenyadav"), `Personal-name URL is forbidden on ${path}`);
+  }
+
+  for (const block of blocks) {
+    const mainEntity = block.mainEntityOfPage;
+    const mainEntityId = typeof mainEntity === "string" ? mainEntity : mainEntity && typeof mainEntity === "object" ? mainEntity["@id"] : undefined;
+    if (typeof mainEntityId === "string") {
+      assert.equal(new URL(mainEntityId, canonicalBase).href, expectedUrl, `mainEntityOfPage must match the canonical page URL on ${path}`);
+    }
+  }
+}
 function getPageMetadata(html, label) {
   const title = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
   assert.ok(title, `Missing document title on ${label}`);
@@ -105,6 +126,7 @@ function parseSitemap(xml) {
   const urls = locations.map((location) => new URL(location));
   for (const url of urls) {
     assert.equal(url.origin, canonicalBase.origin, `Sitemap URL must use canonical origin ${canonicalBase.origin}: ${url.href}`);
+    assert.ok(!url.href.toLowerCase().includes("praveenyadav"), `Sitemap must not expose a personal-name URL: ${url.href}`);
     assert.equal(url.search, "", `Sitemap URL must not contain query parameters: ${url.href}`);
     assert.equal(url.hash, "", `Sitemap URL must not contain a fragment: ${url.href}`);
   }
@@ -152,12 +174,14 @@ const guide = await getPage(guidePath);
 assertCanonical(guide, canonicalUrl(guidePath));
 assertPageMetadata(guide, guidePath);
 assertSchemaType(guide, guidePath, ["Article"]);
+assertCanonicalEntityIds(guide, guidePath);
 
 for (const path of placePaths) {
   const html = await getPage(path);
   assertCanonical(html, canonicalUrl(path));
   assertPageMetadata(html, path);
   assertSchemaType(html, path, ["Restaurant", "BarOrPub", "LocalBusiness"]);
+  assertCanonicalEntityIds(html, path);
   assert.ok(html.includes("hello@dallascircle.com"), `${path} should expose the correction contact.`);
   assert.ok(html.includes("Source checked"), `${path} should show source freshness context.`);
 }
