@@ -90,9 +90,24 @@ async function getExploreData() {
   }
 
   const places = placeRows.filter((place) => eligiblePlaceIds.has(place.id));
-  const [placeCategoriesResult, categoriesResult] = places.length
+  const [menuFactsResult, officialMenuSourcesResult] = places.length
     ? await Promise.all([
-        supabase.from("place_categories").select("place_id,category_id").in("place_id", places.map((place) => place.id)),
+        supabase.from("place_facts").select("place_id,source_id").in("place_id", places.map((place) => place.id)).eq("fact_key", "menu_price").eq("verification_status", "verified").or(`review_due_at.is.null,review_due_at.gte.${new Date().toISOString()}`),
+        supabase.from("place_sources").select("id").in("place_id", places.map((place) => place.id)).eq("source_type", "official_menu"),
+      ])
+    : [{ data: [], error: null }, { data: [], error: null }];
+  if (menuFactsResult.error || officialMenuSourcesResult.error) {
+    return { neighborhoods: [] as Neighborhood[], places: [] as Place[], guides: [] as Guide[], loadError: true };
+  }
+  const officialMenuSourceIds = new Set((officialMenuSourcesResult.data ?? []).map((source) => source.id));
+  const placesWithReviewedMenuEvidence = new Set((menuFactsResult.data ?? []).filter((fact) => officialMenuSourceIds.has(fact.source_id)).map((fact) => fact.place_id));
+  const placesWithEvidenceBackedPrice = places.map((place) => ({
+    ...place,
+    price_level: placesWithReviewedMenuEvidence.has(place.id) ? place.price_level : null,
+  }));
+  const [placeCategoriesResult, categoriesResult] = placesWithEvidenceBackedPrice.length
+    ? await Promise.all([
+        supabase.from("place_categories").select("place_id,category_id").in("place_id", placesWithEvidenceBackedPrice.map((place) => place.id)),
         supabase.from("categories").select("id,name").eq("is_active", true),
       ])
     : [{ data: [], error: null }, { data: [], error: null }];
@@ -106,7 +121,7 @@ async function getExploreData() {
     if (!name) continue;
     categoriesByPlace.set(link.place_id, [...(categoriesByPlace.get(link.place_id) ?? []), name]);
   }
-  const placesWithCategories = places.map((place) => ({
+  const placesWithCategories = placesWithEvidenceBackedPrice.map((place) => ({
     ...place,
     categories: [...new Set(categoriesByPlace.get(place.id) ?? [])],
   }));
