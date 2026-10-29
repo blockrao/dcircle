@@ -74,14 +74,14 @@ export default async function PlacePage({ params }: PageProps) {
   const [factsResult, sourcesResult, linksResult] = await Promise.all([
     supabase
       .from("place_facts")
-      .select("fact_key,fact_value,checked_at,review_due_at")
+      .select("fact_key,fact_value,source_id,checked_at,review_due_at")
       .eq("place_id", place.id)
       .eq("verification_status", "verified")
       .or(`review_due_at.is.null,review_due_at.gte.${new Date().toISOString()}`)
       .order("checked_at", { ascending: false }),
     supabase
       .from("place_sources")
-      .select("source_url,source_type,publisher_name,accessed_at")
+      .select("id,source_url,source_type,publisher_name,accessed_at")
       .eq("place_id", place.id)
       .order("accessed_at", { ascending: false }),
     supabase
@@ -94,6 +94,7 @@ export default async function PlacePage({ params }: PageProps) {
     throw new Error("Unable to load the published place details.");
   }
 
+  const sourceById = new Map((sourcesResult.data ?? []).map((source) => [source.id, source]));
   const categoryIds = [...new Set((linksResult.data ?? []).map((item) => item.category_id))];
   const categoriesResult = categoryIds.length
     ? await supabase.from("categories").select("id,slug,name").in("id", categoryIds).eq("is_active", true)
@@ -218,6 +219,18 @@ export default async function PlacePage({ params }: PageProps) {
                   <h3 className="font-bold capitalize">{fact.fact_key.replaceAll("_", " ")}</h3>
                   <p className="mt-2 leading-7 text-slate-700">{formatFactValue(fact.fact_value)}</p>
                   <p className="mt-2 text-xs text-slate-500">Checked {displayDate(fact.checked_at)}{fact.review_due_at ? ` · Review due ${displayDate(fact.review_due_at)}` : ""}</p>
+                  {(() => {
+                    const source = sourceById.get(fact.source_id);
+                    return source ? (
+                      <p className="mt-2 text-sm">
+                        <span className="text-slate-600">Source for this detail: </span>
+                        <a className="break-all font-semibold text-amber-800 underline underline-offset-4" href={source.source_url} target="_blank" rel="noopener noreferrer">
+                          {source.publisher_name ?? "View source"}
+                        </a>
+                        <span className="text-slate-500"> · accessed {displayDate(source.accessed_at)}</span>
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               ))}
             </div>
