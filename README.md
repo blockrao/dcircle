@@ -18,8 +18,8 @@ The product must not imply firsthand visits or publish unsupported claims. Use r
 
 - Next.js App Router and TypeScript
 - Tailwind CSS
-- Supabase/PostgreSQL, after schema and RLS validation
-- Vercel deployment
+- Supabase/PostgreSQL, with schema, RLS, grants, and publication rules validated
+- Hosting provider to be finalized before launch; no deployment is required during local development
 
 ## Development
 
@@ -30,9 +30,23 @@ npm ci
 npm run lint
 npm run build
 npm run dev
-# After deploying a preview or production build:
-SITE_URL=https://your-preview-domain.example npm run check:live
 ```
+
+With the local development server running, use a second terminal for the route/SEO check:
+
+```bash
+SITE_URL=http://localhost:3000 CANONICAL_SITE_URL=https://dallascircle.com npm run check:live
+```
+
+The verifier checks HTTP status, canonical URLs, titles/descriptions, JSON-LD parsing and page types, sitemap uniqueness and coverage, robots rules, internal links, source/correction context, and the retired-path redirect. It fetches pages from `SITE_URL` but expects public canonical URLs to use `CANONICAL_SITE_URL`, allowing local validation without changing the production canonical host.
+
+When a staging environment is eventually available, run the same verifier against it:
+
+```bash
+SITE_URL=https://your-preview-domain.example CANONICAL_SITE_URL=https://dallascircle.com npm run check:live
+```
+
+Do not run the route verifier against an old production deployment and interpret its failures as regressions in this branch. Do not deploy until local quality gates pass and the remaining database/security blockers are resolved or explicitly accepted.
 
 Read `AGENTS.md` and the matching Next.js documentation available in the installed package before making framework changes. Check `package.json` for the scripts actually available in this checkout.
 
@@ -43,10 +57,8 @@ Read `AGENTS.md` and the matching Next.js documentation available in the install
 - `docs/route-data-architecture-audit.md` and `docs/seo-foundation-audit.md` record the current source-level findings and outstanding verification.
 - `docs/supabase-security-audit.md` records the live database findings, applied access-hardening migrations, and remaining permissions blocker.
 
-The public write/API surface remains disconnected. Server-rendered place and guide pages now use the anonymous read-only client and explicit RLS/grant contracts; no browser service-role key or public write helpers exist. The live audit and grant-hardening migrations are documented in `docs/supabase-security-audit.md`. The historical migration baseline has been recovered from the live Supabase migration record and restored to the repository. The `supabase_admin` default ACL remains unchanged, but the existing DDL event trigger now fails closed and removes broad grants from new public objects; this was tested live. An authorized superuser/role-owner path is still needed to correct the underlying default ACL itself.
+The public write/API surface remains disconnected. Server-rendered place and guide pages use the anonymous read-only client and explicit RLS/grant contracts; no browser service-role key or public write helpers exist. The live audit and grant-hardening migrations are documented in `docs/supabase-security-audit.md`. The historical migration baseline has been recovered from the live Supabase migration record and restored to the repository. The `supabase_admin` default ACL remains unchanged, but the existing DDL event trigger now fails closed and removes broad grants from new public objects; this was tested live. An authorized superuser/role-owner path is still needed to correct the underlying default ACL itself.
 
 ## Release rule
 
-Use `scripts/verify-live-routes.mjs` via `npm run check:live` against a deployed preview or production URL to check HTTP status, canonical tags, JSON-LD, source/correction context, sitemap inclusion, and the retired-path redirect. Do not run it against the old production deployment and treat failure as a code regression before deploying this branch.
-
-Do not describe changes as production-ready or deployed unless type/lint/build checks, route/link checks, security checks, and live HTTP validation have actually run. Keep unrun checks visible in the pull request.
+A successful build is not proof of correct SEO behavior or production readiness. Keep source-level checks, local HTTP checks, live preview checks, security checks, and launch approval distinct. Do not describe a feature as deployed or verified unless the corresponding check actually ran, and keep unrun checks visible in the pull request.
