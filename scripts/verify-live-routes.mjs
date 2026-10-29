@@ -184,6 +184,7 @@ for (const path of placePaths) {
   assertCanonicalEntityIds(html, path);
   assert.ok(html.includes("hello@dallascircle.com"), `${path} should expose the correction contact.`);
   assert.ok(html.includes("Source checked"), `${path} should show source freshness context.`);
+  assert.ok(html.includes(guidePath), `${path} should link to the relevant published guide when the place is featured in it.`);
 }
 
 const robots = await getPage("/robots.txt");
