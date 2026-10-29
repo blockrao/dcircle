@@ -15,11 +15,13 @@ The architecture is appropriate for the initial Deep Ellum product: Next.js App 
 - Place pages include canonical metadata, business-type JSON-LD, official-source links, checked/review context, and correction contact.
 - Guide pages include canonical metadata, Article JSON-LD, linked canonical place records, sources, and sponsorship disclosure where applicable.
 - Categories are normalized through `categories` and `place_categories`.
-- Sitemap generation includes static pages and published place/guide records. Place and guide pages have publication-state checks, and database publication gates are intended to enforce source and completeness requirements.
+- Sitemap generation includes static pages and only those published place/guide records that pass the same current-evidence checks as page rendering. A shared `lib/publication-eligibility.ts` helper requires a current verified fact, a source visible under its RLS policy, and an active primary category for a place to be indexable. Guides require a review timestamp, a visible source, and at least one linked place that passes the place eligibility gate.
 - `app/robots.ts` allows general crawlers and explicitly allows `OAI-SearchBot`; the sitemap and host use the canonical domain.
 - Public write/API routes remain disconnected. No service-role key is used in browser code.
 - The live database has nine canonical local-discovery tables with reviewed public-read policies. The 14 legacy business/service tables remain empty and access-restricted pending coordinated retirement.
 - The security advisor still reports 14 informational RLS-enabled-without-policy findings on those legacy tables. The performance advisor reports 30 unused-index findings, mostly on legacy tables. These findings are not, by themselves, justification to remove indexes without checking table usage and query plans.
+- Applied live migration `20261029014857_require_reviewed_guides_and_preserve_publication_integrity`: public guide and related-row policies now require reviewed guides; triggers prevent published guides from losing all sources or place relationships, prevent unpublishing a place while a published guide still depends on it, and prevent a published place from losing its last current verified fact through a row mutation.
+- A rollback-only database regression test was executed successfully. It confirmed publication fails without source evidence, deleting the last current fact is rejected, deleting the last guide source/place is rejected, and a place cannot be unpublished while a published guide depends on it. The test records were rolled back and a follow-up count confirmed none remained. Anonymous write privileges and access to internal source/fact notes were also verified denied.
 
 ## Current validation and gaps
 
@@ -46,10 +48,10 @@ The verifier currently expects the initial vertical slice to contain the homepag
 
 ## Next execution sequence
 
-1. Run CI on the updated branch and confirm syntax, lint, and build results.
+1. Run CI on the updated branch and confirm syntax, lint, and build results after the shared eligibility refactor.
 2. Run the expanded route verifier against the local development server; fix any real defects it finds rather than bypassing assertions.
-3. Add publication-integrity and anonymous-access regression tests for published versus draft/hidden records, private source/fact fields, and denied public writes.
-4. Audit the place/guide publication gates and sitemap eligibility against the same page completeness contract.
+3. Run `supabase/tests/publication-integrity.sql` against the current database or a safe staging clone after future schema changes.
+4. Verify draft/hidden records are absent from anonymous reads and sitemap output, and that a guide with no eligible place is not rendered or listed.
 5. Resolve the `supabase_admin` default-ACL blocker through an authorized path; re-run the Supabase security advisor and record the outcome.
 6. Complete editorial correction/history and freshness operations before materially increasing the number of public pages.
 7. Keep deployment and destructive legacy-table retirement gated until the local acceptance suite passes and the remaining security decisions are documented.
