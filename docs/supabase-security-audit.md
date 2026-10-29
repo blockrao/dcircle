@@ -112,9 +112,9 @@ The database still contains empty legacy tables, including `service_leads`, `web
 
 ## Migration-history drift
 
-The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch has a local file for each remote migration version. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) were created outside the tracked migration chain; a staged retirement migration now removes all 14 empty legacy business/service tables and their unused enum types so fresh and live databases can converge.
+The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch has a local file for each remote migration version. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) were created outside the tracked migration chain; a staged migration `20261029020000_retire_legacy_business_services_schema.sql` removes all 14 empty legacy business/service tables and their unused enum types so fresh and live databases can converge. Its version is intentionally later than the latest applied migration `20261029014857`.
 
-The retirement migration has been committed to the branch but has **not** been applied to the live project. Apply it only after the hyperlocal-only application version is deployed and the old production route/form dependency check is complete. The underlying `supabase_admin` default ACL remains unresolved even though the new-object DDL guard mitigates its effective impact.
+The retirement migration `20261029020000_retire_legacy_business_services_schema.sql` has been committed to the branch but has **not** been applied to the live project. Apply it only after the hyperlocal-only application version is deployed and the old production route/form dependency check is complete. The underlying `supabase_admin` default ACL remains unresolved even though the new-object DDL guard mitigates its effective impact.
 
 ## Rules for the new local-discovery schema
 
