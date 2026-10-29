@@ -75,7 +75,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
       || `Source-backed place profiles in ${data.neighborhood.name}, Dallas.`,
     about: {
       "@type": "Place",
-      "@id": canonical,
+      "@id": `${canonical}#place`,
       name: data.neighborhood.name,
       address: { "@type": "PostalAddress", addressLocality: data.neighborhood.city, addressRegion: data.neighborhood.region, addressCountry: "US" },
     },
@@ -84,8 +84,12 @@ export default async function NeighborhoodPage({ params }: PageProps) {
       itemListElement: data.places.map((place, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        url: `${SITE_URL}/places/${place.slug}`,
-        name: place.name,
+        item: {
+          "@type": "LocalBusiness",
+          "@id": `${SITE_URL}/places/${place.slug}`,
+          url: `${SITE_URL}/places/${place.slug}`,
+          name: place.name,
+        },
       })),
     },
   };

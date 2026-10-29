@@ -190,6 +190,21 @@ assertCanonical(neighborhood, canonicalUrl(neighborhoodPath));
 assertPageMetadata(neighborhood, neighborhoodPath);
 assertSchemaType(neighborhood, neighborhoodPath, ["CollectionPage"]);
 assertCanonicalEntityIds(neighborhood, neighborhoodPath);
+const neighborhoodSchemas = getJsonLd(neighborhood, neighborhoodPath);
+const neighborhoodSchema = neighborhoodSchemas.find((block) => block["@type"] === "CollectionPage");
+assert.ok(neighborhoodSchema, "Neighborhood page should expose CollectionPage schema.");
+assert.equal(
+  neighborhoodSchema.about?.["@id"],
+  `${canonicalUrl(neighborhoodPath)}#place`,
+  "Neighborhood Place entity should have a stable identity distinct from the CollectionPage URL.",
+);
+const neighborhoodItems = neighborhoodSchema.mainEntity?.itemListElement ?? [];
+for (const path of placePaths) {
+  assert.ok(
+    neighborhoodItems.some((item) => item.item?.["@id"] === canonicalUrl(path)),
+    `Neighborhood ItemList should reference canonical place entity ${canonicalUrl(path)}`,
+  );
+}
 for (const path of placePaths) {
   assert.ok(neighborhood.includes(path), `${neighborhoodPath} should link to eligible canonical profile ${path}`);
 }
