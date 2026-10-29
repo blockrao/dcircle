@@ -23,14 +23,18 @@ The product must not imply firsthand visits or publish unsupported claims. Use r
 
 ## Development
 
-Install dependencies and run the available checks:
+Install dependencies, configure the public Supabase client, and run the available checks:
 
 ```bash
 npm ci
+cp .env.example .env.local
+# Edit .env.local with the project's Supabase URL and public anon key.
 npm run lint
 npm run build
 npm run dev
 ```
+
+Only use the Supabase publishable/anon key in `NEXT_PUBLIC_SUPABASE_ANON_KEY`; never place a service-role key in a `NEXT_PUBLIC_*` variable or commit real credentials.
 
 With the local development server running, use a second terminal for the route/SEO check:
 
