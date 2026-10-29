@@ -58,7 +58,7 @@ Build a broad local discovery experience that feels like a useful local publicat
 
 DallasCircle's advantage must compound through a system competitors cannot reproduce simply by installing a template or generating many pages:
 
-1. **Canonical local entities.** Stable records for places, venues, guides and, later when justified, events. Relationships are explicit and facts are not copied inconsistently across pages.
+1. **Canonical local entities.** Every published merchant has one stable, permanent public profile URL and canonical record. Guides, articles, locality/topic pages, collections, and ranked lists reference that same merchant entity. Stable records also cover localities, venues, guides, founders (when consented), and, later when justified, events. Relationships are explicit and facts are not copied inconsistently across pages.
 2. **Fact-level provenance.** Important claims have source records, verification method/status, checked timestamps, and review expectations. Unknown, stale, conflicting, and verified information are distinct states.
 3. **Freshness operations.** Volatile details—especially kitchen hours, menus, prices, booking links and event information—have appropriate review cadences. Old data is never presented as newly verified.
 4. **Occasion-based discovery.** Content and future retrieval answer practical needs: pre-show dining, late-night food, date nights within a defined budget, and relevant options near a venue. Each recommendation should explain why it qualifies.
@@ -114,6 +114,9 @@ Keep the existing Next.js, TypeScript, Tailwind, and Supabase foundation. Build 
 **Decision:** Build a custom SEO-first local discovery product on proven foundations. Retain the current Next.js App Router, TypeScript, Tailwind CSS and Supabase/PostgreSQL direction. Custom-build the domain model and logic where it creates DallasCircle's product advantage. Do not replace the application wholesale with a generic directory template or general-purpose boilerplate.
 
 ### Build specifically for DallasCircle
+- Canonical merchant/place profile pages with stable URLs and shared entity IDs used across every guide, article, locality/topic page, filter, and collection.
+- Structured merchant classification and locality relationships for directory-style browsing and deterministic filtering.
+- Optional founder profiles: a distinct canonical Person entity published only when the founder or authorized representative has explicitly opted in, the identity/role is verified, and the profile meets editorial standards. Link founders to businesses through explicit role relationships.
 - Canonical place, guide and venue relationships.
 - Fact/source provenance and freshness state.
 - Page-type publication thresholds and a shared publication-eligibility contract.
@@ -133,6 +136,16 @@ Reuse established framework capabilities and proven patterns for testing, access
 
 ### Hosting decision
 Hosting is **not yet locked**. Choose a provider only after the current foundation passes local runtime/SEO checks and outstanding security blockers are resolved or explicitly accepted. Compare candidate providers on reproducible builds, preview and rollback workflow, caching/revalidation, route behavior, logs and monitoring, security, operational control, portability and total cost. Do not choose a provider because it claims SEO or AI-discovery advantages.
+
+## 6A. Canonical merchant profiles and founder profiles
+
+Every eligible published merchant must have one permanent canonical profile URL and stable entity identifier. The same profile is reused throughout DallasCircle: articles, guides, locality pages, topic pages, curated collections, and ranked lists must link to the canonical merchant URL rather than create duplicate merchant pages. Slug changes require a permanent redirect, updated internal links, and a consistent canonical/sitemap reference.
+
+Merchant profiles are the source of truth for structured business facts, locality/category relationships, official links, source provenance, verification and freshness state, correction history, and visible sponsorship disclosure. Filters and groupings use canonical IDs and structured attributes. Filter parameters and collection contexts must not create competing indexable copies of merchant profiles.
+
+Render appropriate JSON-LD based on the real entity and the visible page, using the most specific suitable Schema.org `LocalBusiness` subtype where applicable. Use a stable entity `@id`, accurate canonical URL, and only verified/visible properties. Founder relationships may be represented with `founder` only when the claim is supported and shown on the page. Structured data must match visible content; it does not guarantee ranking, rich results, or AI citations. See [Google's Local Business structured data guidance](https://developers.google.com/search/docs/appearance/structured-data/local-business), [Schema.org LocalBusiness](https://schema.org/LocalBusiness), and [Google's canonicalization guidance](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls).
+
+Founder profiles are an opt-in editorial feature, not a default scrape of owners or directors. A founder profile may be created only when the person or an authorized representative opts in, identity and founder/co-founder role are verified, appropriate use of biography/photo is approved, and a meaningful profile can be maintained. A founder may be linked to multiple businesses; each business relationship must record its role and evidence. Founder profiles should have their own canonical Person identity only when they meet publication thresholds. No consent means no public founder profile; never infer founder status from an unverified name or conflate founder, owner, CEO, promoter, and current operator.
 
 ## 7. Non-negotiable SEO and publication rules
 
@@ -172,7 +185,7 @@ The foundation is **not yet declared launch-ready**. Immediate gates are:
 7. Measure Search Console performance, guide-to-profile navigation, official outbound clicks, newsletter signup and user/business feedback.
 8. Expand only when evidence shows the initial product is useful and the operating model is repeatable.
 
-The immediate priority is to prove and finish the current foundation while aligning the experience and locality model with the broader editorial platform vision—not restart the repository or continue debating starter templates.
+The immediate priority is to prove and finish the current foundation while aligning the experience, canonical merchant/founder entity model, and locality model with the broader editorial platform vision—not restart the repository or continue debating starter templates.
 
 ## 10. Definition of progress
 
