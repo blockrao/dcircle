@@ -6,7 +6,14 @@
 **Operating model:** Remote-first, editorial-led digital product  
 **Initial market:** Deep Ellum, Dallas, Texas
 
-This document records the strategic direction that all product, engineering, SEO, content, and infrastructure decisions must support. The detailed business strategy and execution plan is maintained separately; implementation requirements, delivery backlog, and audits must remain consistent with this baseline.
+This document records the strategic direction that all product, engineering, SEO, content, and infrastructure decisions must support. The long-form business strategy and execution plan is maintained as a companion project artifact; this concise decision record is the repository's authoritative strategic baseline. Implementation requirements, delivery backlog, and audits must remain consistent with it.
+
+Related execution documents:
+- [High-level product and architecture requirements](./high-level-product-and-architecture-requirements.md)
+- [Prioritized delivery backlog](./prioritized-delivery-backlog.md)
+- [SEO foundation audit](./seo-foundation-audit.md)
+- [Route/data architecture audit](./route-data-architecture-audit.md)
+- [Supabase security audit](./supabase-security-audit.md)
 
 ## 1. Vision
 
