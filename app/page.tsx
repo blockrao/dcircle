@@ -36,17 +36,22 @@ async function getFeaturedPlaces() {
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase
     .from("places")
-    .select("id,slug,name,summary,neighborhood_id")
+    .select("id,slug,name,summary")
     .eq("publication_status", "published")
     .not("published_at", "is", null)
     .order("name", { ascending: true })
     .limit(12);
 
-  if (error) throw new Error("Unable to load published places for the homepage.");
-  if (!data?.length) return [];
+  // Discovery is additive: a temporary read/evidence failure should not take
+  // down the core homepage. Fail closed by omitting the section.
+  if (error || !data?.length) return [];
 
-  const eligibleIds = await getEligiblePlaceIds(supabase, data.map((place) => place.id));
-  return data.filter((place) => eligibleIds.has(place.id)).slice(0, 6);
+  try {
+    const eligibleIds = await getEligiblePlaceIds(supabase, data.map((place) => place.id));
+    return data.filter((place) => eligibleIds.has(place.id)).slice(0, 6);
+  } catch {
+    return [];
+  }
 }
 
 export default async function HomePage() {
