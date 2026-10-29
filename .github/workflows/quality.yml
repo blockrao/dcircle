@@ -40,6 +40,9 @@ jobs:
       - name: Check publication-audit syntax
         run: node --check scripts/audit-publication-integrity.mjs
 
+      - name: Check discovery-coverage-audit syntax
+        run: node --check scripts/audit-discovery-data-coverage.mjs
+
       - name: Lint
         run: npm run lint
 
@@ -61,6 +64,12 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run audit:publication
+
+      - name: Audit discovery data coverage (read-only)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npm run audit:coverage
 
       - name: Start production server and verify routes, SEO, and internal links
         env:
