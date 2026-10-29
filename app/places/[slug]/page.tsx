@@ -102,6 +102,39 @@ export default async function PlacePage({ params }: PageProps) {
 
   if (!factsResult.data?.length || !sourcesResult.data?.length) notFound();
 
+  // Add the reverse edge of the editorial entity graph: eligible place
+  // profiles can lead readers back to reviewed guides that feature the place.
+  // This is deliberately best-effort; a related-content lookup must not make
+  // an otherwise valid canonical place profile unavailable.
+  let relatedGuides: { slug: string; title: string; summary: string }[] = [];
+  const guideLinksResult = await supabase
+    .from("guide_places")
+    .select("guide_id")
+    .eq("place_id", place.id);
+
+  if (!guideLinksResult.error && guideLinksResult.data?.length) {
+    const guideIds = [...new Set(guideLinksResult.data.map((link) => link.guide_id))];
+    const [guidesResult, guideSourcesResult] = await Promise.all([
+      supabase
+        .from("guides")
+        .select("id,slug,title,summary")
+        .in("id", guideIds)
+        .eq("publication_status", "published")
+        .not("published_at", "is", null)
+        .not("reviewed_at", "is", null)
+        .order("reviewed_at", { ascending: false })
+        .limit(6),
+      supabase.from("guide_sources").select("guide_id").in("guide_id", guideIds),
+    ]);
+
+    if (!guidesResult.error && !guideSourcesResult.error) {
+      const sourcedGuideIds = new Set((guideSourcesResult.data ?? []).map((source) => source.guide_id));
+      relatedGuides = (guidesResult.data ?? [])
+        .filter((guide) => sourcedGuideIds.has(guide.id))
+        .map(({ slug, title, summary }) => ({ slug, title, summary }));
+    }
+  }
+
   const categories = (categoriesResult.data ?? []).map((category) => ({
     ...category,
     isPrimary: (linksResult.data ?? []).some((link) => link.category_id === category.id && link.is_primary),
@@ -156,6 +189,21 @@ export default async function PlacePage({ params }: PageProps) {
             {categories.length ? <div><dt className="font-semibold">Categories</dt><dd>{categories.map((category) => category.name).join(" · ")}</dd></div> : null}
           </dl>
         </section>
+
+        {relatedGuides.length ? (
+          <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-6">
+            <h2 className="text-xl font-bold">Guides featuring this place</h2>
+            <p className="mt-2 leading-7 text-slate-600">Explore reviewed, source-backed guides that include this business.</p>
+            <ul className="mt-4 space-y-3">
+              {relatedGuides.map((guide) => (
+                <li key={guide.slug}>
+                  <Link href={`/guides/${guide.slug}`} className="font-semibold text-amber-800 underline underline-offset-4">{guide.title}</Link>
+                  {guide.summary ? <p className="mt-1 text-sm leading-6 text-slate-600">{guide.summary}</p> : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {factsResult.data?.length ? (
           <section className="mt-9">
