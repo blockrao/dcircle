@@ -124,7 +124,11 @@ Do not use raw URL count, schema count, AI-generated word count, or social follo
 5. **Fifth:** instrument baseline behavior and run the focused user/merchant pilot.
 6. **Later:** founder profiles, broader locality/topic expansion, monetization experiments, and advanced features.
 
-## 7. Decision discipline
+## 7. Mandatory pre-execution review and decision discipline
+
+Before any material step is implemented, apply [`docs/architecture-and-product-review-gate.md`](./architecture-and-product-review-gate.md). Review user outcome, strategy, discoverability, evidence, canonical/data integrity, security/privacy, operational qualities, alternatives, acceptance criteria, verification and rollback. Safe reversible work may proceed after review; high-risk, destructive, costly or externally consequential actions require the appropriate explicit user approval.
+
+
 
 For each material change, record the problem, user benefit, options considered, evidence, decision, acceptance criteria, risk/rollback, and verification. Prefer small, reversible changes. Do not add infrastructure, dependencies, or new product surfaces without a clear need. Do not claim work is complete until the relevant evidence exists.
 
