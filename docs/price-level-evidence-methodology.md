@@ -41,6 +41,16 @@ Research performed 29 October 2026. These findings are research notes, not datab
 | Pecan Lodge | [Official website](https://pecanlodge.com/) and [official in-house menu PDF](https://pecanlodge.com/wp-content/uploads/2024/09/PCL-menu-sep-24-2024.pdf) provide venue/menu context, but the located in-house menu is dated September 2024. Current official shop/catering prices are not equivalent to a current individual dine-in meal. | No sufficiently current, representative dine-in price evidence confirmed in this research pass. | Keep null. Find current official dine-in menu/ordering prices before review. |
 | Armoury D.E. | [Official website](https://armouryde.com/) and [official menus page](https://armouryde.com/home/menus/) establish the food/drink offering, but a complete current priced menu could not be verified from the official pages in this pass. | Menu prices and a representative solo spend remain unverified. | Keep null. Seek a current official menu or direct confirmation before review. |
 
+## Canonical evidence record contract
+
+Use the existing canonical tables; no schema migration is required for the current workflow:
+
+- Create or refresh a `place_sources` row for the exact official menu URL, with `source_type = official_menu`, publisher name, and current `accessed_at`.
+- Store the reviewed estimate in `place_facts` using `fact_key = menu_price`, referencing that same source and place. Set `verification_status = verified` only after an editor confirms the representative order and level; set `checked_at` to the menu review time and `review_due_at` to the next scheduled review.
+- Use a compact structured `fact_value` that records the proposed level, currency, before-tax/tip basis, representative order items and prices, total, and assumptions. Do not place private editorial notes in `fact_value`; keep those in `internal_notes`.
+- The public price-level label and Explore price filter must require both a non-null `places.price_level` and a current verified `menu_price` fact backed by an `official_menu` source. If the evidence expires or is absent, do not expose a price level in Explore.
+- The place profile should link the visible estimate directly to the official menu and show when the menu evidence was checked. The generic verified-fact list may also show the evidence details, so keep its structured value reader-friendly.
+
 ## Data and release safeguards
 
 - This method does not change schema, row-level security, grants, publication eligibility, or live records.

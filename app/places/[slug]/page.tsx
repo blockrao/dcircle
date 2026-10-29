@@ -13,7 +13,7 @@ async function getPublishedPlace(slug: string) {
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase
     .from("places")
-    .select("id,slug,name,summary,website_url,phone,address_line1,address_line2,city,region,postal_code,published_at,last_editorial_review_at,neighborhood_id")
+    .select("id,slug,name,summary,website_url,phone,address_line1,address_line2,city,region,postal_code,published_at,last_editorial_review_at,neighborhood_id,price_level")
     .eq("slug", slug)
     .eq("publication_status", "published")
     .not("published_at", "is", null)
@@ -95,6 +95,8 @@ export default async function PlacePage({ params }: PageProps) {
   }
 
   const sourceById = new Map((sourcesResult.data ?? []).map((source) => [source.id, source]));
+  const menuPriceFact = (factsResult.data ?? []).find((fact) => fact.fact_key === "menu_price" && sourceById.get(fact.source_id)?.source_type === "official_menu");
+  const priceLabel = place.price_level === 1 ? "$" : place.price_level === 2 ? "$" : place.price_level === 3 ? "$$" : place.price_level === 4 ? "$$" : null;
   const categoryIds = [...new Set((linksResult.data ?? []).map((item) => item.category_id))];
   const categoriesResult = categoryIds.length
     ? await supabase.from("categories").select("id,slug,name").in("id", categoryIds).eq("is_active", true)
@@ -191,6 +193,7 @@ export default async function PlacePage({ params }: PageProps) {
             {place.phone ? <div><dt className="font-semibold">Phone</dt><dd><a className="underline underline-offset-4" href={`tel:${place.phone.replace(/[^+0-9]/g, "")}`}>{place.phone}</a></dd></div> : null}
             {place.website_url ? <div><dt className="font-semibold">Official website</dt><dd><a className="break-all text-amber-800 underline underline-offset-4" href={place.website_url} target="_blank" rel="noopener noreferrer">{place.website_url}</a></dd></div> : null}
             {categories.length ? <div><dt className="font-semibold">Categories</dt><dd>{categories.map((category) => category.name).join(" · ")}</dd></div> : null}
+            {priceLabel && menuPriceFact ? <div><dt className="font-semibold">Price level</dt><dd>{priceLabel} · Approximate individual meal spend, before tax and tip.</dd><dd className="mt-1 text-sm text-slate-600">Based on an official menu checked {displayDate(menuPriceFact.checked_at)}. Menu prices can change.</dd><dd className="mt-1 text-sm"><a className="font-semibold text-amber-800 underline underline-offset-4" href={sourceById.get(menuPriceFact.source_id)?.source_url} target="_blank" rel="noopener noreferrer">View official menu evidence</a></dd></div> : null}
           </dl>
         </section>
 
