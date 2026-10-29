@@ -4,7 +4,8 @@
 **Strategic baseline:** [`docs/vision-and-strategic-direction.md`](./vision-and-strategic-direction.md)  
 **Original vision source:** *DallasCircle.com — Vision, Business Strategy & Execution Plan*, dated 22 October 2026  
 **Repository:** `blockrao/dcircle`  
-**Initial positioning:** **DallasCircle — Deep Ellum for the night out**  
+**Initial launch wedge:** Deep Ellum nightlife and night-out planning  
+**Long-term product:** Editorial-led local discovery across Dallas localities and a broad range of topics  
 **Operating model:** Remote-first, editorial-led digital product
 
 ---
@@ -13,7 +14,7 @@
 
 The strategic baseline is now explicit: DallasCircle is a custom SEO-first local-discovery product built on proven foundations. Search discoverability is paramount, but the intended advantage comes from canonical local entities, fact-level provenance, freshness controls, useful occasion-based recommendations, editorial integrity, and crawlable connected architecture—not from schema tricks, page count, or wholesale adoption of a starter repository. Keep Next.js App Router, TypeScript, Tailwind CSS, and Supabase/PostgreSQL as the current foundation. Do not lock hosting until runtime/SEO verification and security gates are addressed. Any change to this direction requires a written product and architecture rationale.
 
-DallasCircle should not launch as a generic directory that attempts to compete head-on with Google Maps, Yelp, Tripadvisor, or broad city guides on listing volume and reviews. Its initial wedge is to help people plan a real evening in Deep Ellum by combining reliable local facts into occasion-based answers: pre-show dining, late-night food, date-night options within a budget, and practical choices near a venue.
+DallasCircle should not launch as a generic directory that competes on listing volume alone. The intended long-term experience is a broad, editorial-led local guide with topic breadth and locality-aware browsing, inspired by DailyDFW's scannable information architecture but using DallasCircle's own visual identity. Its first complete wedge is to help people plan a real evening in Deep Ellum with reliable facts and occasion-based answers. The UI and locality model should support future expansion without publishing empty locality/topic pages.
 
 The technical advantage should be a **trustworthy, structured, freshness-aware local knowledge system** underneath a genuinely useful editorial product. The same source-backed records should support the website, guides, search metadata, structured data, newsletter production, corrections, and eventually merchant tools. Do not create separate inconsistent copies of business facts in page code, articles, spreadsheets, and marketing tools.
 
@@ -21,7 +22,7 @@ The vision document is explicit that the first milestone is a credible, useful D
 
 ## 2. Product principles and hard constraints
 
-1. **Start narrow:** Deep Ellum and the night-out use case first.
+1. **Build for breadth, launch with depth:** design topic/locality navigation for the long-term product, but prove quality with Deep Ellum and the night-out use case first.
 2. **Usefulness over page count:** A small set of high-quality, complete pages beats thousands of thin programmatic pages.
 3. **Evidence before claims:** Important facts need a source and a checked date; never invent firsthand visits, reviews, quotes, popularity, or local experience.
 4. **Freshness is a product feature:** Hours, late-night kitchen availability, menus, prices, event times, booking links, and venue relationships can change.
@@ -30,7 +31,7 @@ The vision document is explicit that the first milestone is a credible, useful D
 7. **Merchant-first commercial learning, not merchant-first editorial bias:** Build useful coverage and notify relevant businesses; test paid distribution only when the audience and deliverable can be described honestly.
 8. **One canonical data source:** Business and venue facts should live in structured records, not hard-coded page content.
 9. **Search is an acquisition channel, not the product itself:** Optimize for real user decisions; do not promise rankings or AI citations.
-10. **Expand only on evidence:** New neighborhoods, categories, merchant software, rewards, apps, or marketplaces require demonstrated demand and repeatable operations.
+10. **Expand coverage in measured waves:** the product is intended to cover Dallas localities and many local topics, but indexable pages require meaningful, source-backed inventory and repeatable freshness operations. Merchant software, rewards, apps, and marketplaces require separate evidence.
 
 ## 3. Users and jobs to be done
 
@@ -113,7 +114,7 @@ Priority definitions:
 
 - The homepage must consistently express the approved positioning and initial geography.
 - Navigation must lead to real, functioning pages. No placeholder or sample feed links may be published as real articles.
-- The initial information architecture must support the core guide, individual restaurant profiles, About/trust statement, newsletter signup, and correction/contact route.
+- The initial information architecture must support the core guide, individual place profiles, About/trust statement, newsletter signup, and correction/contact route, while establishing reusable topic navigation and locality browsing for future breadth. See `docs/ui-and-locality-coverage-principles.md`.
 - Each public page must have a single primary purpose and clear next action.
 - Mobile experience, accessibility, performance, and simple navigation are launch requirements.
 
@@ -300,7 +301,7 @@ Use the current repository's Next.js/TypeScript and Supabase/PostgreSQL directio
 ## 7. Explicit non-goals for the first release
 
 Do not build these before the initial product demonstrates demand:
-- a generic all-DFW directory;
+- mass-generating thin or empty locality/topic pages to simulate coverage;
 - hundreds of thin programmatic SEO pages;
 - an app, rewards system, loyalty program, or marketplace;
 - a complex merchant dashboard;
@@ -339,7 +340,7 @@ Phase 1 does not require a predetermined traffic number or revenue outcome. The 
 
 ## 9. Immediate engineering sequence
 
-1. Resolve the repository's product-positioning conflict before rewriting consumer-facing content.
+1. Align the editorial homepage, topic navigation, locality discovery, and initial Deep Ellum content with the approved product direction.
 2. Audit existing routes and remove or repair links to non-existent article/category/search destinations.
 3. Define the canonical business, fact/source, guide, venue, correction, and publication-state model.
 4. Implement the first public restaurant profile route and the initial guide templates.
