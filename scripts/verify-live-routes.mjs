@@ -1,21 +1,23 @@
 import assert from "node:assert/strict";
 
 const rawBase = process.env.SITE_URL ?? "http://localhost:3000";
+const rawCanonicalBase = process.env.CANONICAL_SITE_URL ?? "https://dallascircle.com";
 const base = new URL(rawBase.endsWith("/") ? rawBase : `${rawBase}/`);
+const canonicalBase = new URL(rawCanonicalBase.endsWith("/") ? rawCanonicalBase : `${rawCanonicalBase}/`);
 
-assert.ok(["http:", "https:"].includes(base.protocol), "SITE_URL must use HTTP or HTTPS.");
-assert.equal(base.pathname, "/", "SITE_URL must be an origin, without a path prefix.");
-assert.equal(base.search, "", "SITE_URL must not include a query string.");
-assert.equal(base.hash, "", "SITE_URL must not include a fragment.");
-
-const requestOptions = {
-  redirect: "manual",
-  signal: AbortSignal.timeout(15_000),
-};
+for (const [name, url] of [["SITE_URL", base], ["CANONICAL_SITE_URL", canonicalBase]]) {
+  assert.ok(["http:", "https:"].includes(url.protocol), `${name} must use HTTP or HTTPS.`);
+  assert.equal(url.pathname, "/", `${name} must be an origin, without a path prefix.`);
+  assert.equal(url.search, "", `${name} must not include a query string.`);
+  assert.equal(url.hash, "", `${name} must not include a fragment.`);
+}
 
 async function getResponse(pathOrUrl) {
   const url = pathOrUrl instanceof URL ? pathOrUrl : new URL(pathOrUrl, base);
-  return fetch(url, requestOptions);
+  return fetch(url, {
+    redirect: "manual",
+    signal: AbortSignal.timeout(15_000),
+  });
 }
 
 async function getPage(pathOrUrl) {
@@ -23,6 +25,10 @@ async function getPage(pathOrUrl) {
   const label = pathOrUrl instanceof URL ? pathOrUrl.pathname : pathOrUrl;
   assert.equal(response.status, 200, `${label} should return HTTP 200; got ${response.status}`);
   return response.text();
+}
+
+function canonicalUrl(path) {
+  return new URL(path, canonicalBase).href;
 }
 
 function getTagAttributes(tag) {
@@ -40,7 +46,7 @@ function assertCanonical(html, expectedUrl) {
   assert.ok(canonicalTag, `Missing canonical link for ${expectedUrl}`);
   const href = getTagAttributes(canonicalTag).href;
   assert.ok(href, `Canonical link has no href for ${expectedUrl}`);
-  assert.equal(new URL(href, base).href, expectedUrl, `Wrong canonical URL for ${expectedUrl}`);
+  assert.equal(new URL(href, canonicalBase).href, expectedUrl, `Wrong canonical URL for ${expectedUrl}`);
 }
 
 function getJsonLd(html, label) {
@@ -93,7 +99,7 @@ function parseSitemap(xml) {
 
   const urls = locations.map((location) => new URL(location));
   for (const url of urls) {
-    assert.equal(url.origin, base.origin, `Sitemap URL must use canonical origin ${base.origin}: ${url.href}`);
+    assert.equal(url.origin, canonicalBase.origin, `Sitemap URL must use canonical origin ${canonicalBase.origin}: ${url.href}`);
     assert.equal(url.search, "", `Sitemap URL must not contain query parameters: ${url.href}`);
     assert.equal(url.hash, "", `Sitemap URL must not contain a fragment: ${url.href}`);
   }
@@ -124,7 +130,6 @@ function getLocalLinkPaths(html) {
   return [...paths];
 }
 
-const homepagePath = "/";
 const guidePath = "/guides/three-deep-ellum-dinner-stops";
 const placePaths = [
   "/places/serious-pizza-deep-ellum",
@@ -132,20 +137,20 @@ const placePaths = [
   "/places/armoury-deep-ellum",
 ];
 
-const homepage = await getPage(homepagePath);
-assertCanonical(homepage, new URL(homepagePath, base).href);
-assertPageMetadata(homepage, homepagePath);
+const homepage = await getPage("/");
+assertCanonical(homepage, canonicalUrl("/"));
+assertPageMetadata(homepage, "/");
 assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
 assert.ok(!homepage.toLowerCase().includes("php rescue"), "Homepage must not promote retired PHP services.");
 
 const guide = await getPage(guidePath);
-assertCanonical(guide, new URL(guidePath, base).href);
+assertCanonical(guide, canonicalUrl(guidePath));
 assertPageMetadata(guide, guidePath);
 assertSchemaType(guide, guidePath, ["Article"]);
 
 for (const path of placePaths) {
   const html = await getPage(path);
-  assertCanonical(html, new URL(path, base).href);
+  assertCanonical(html, canonicalUrl(path));
   assertPageMetadata(html, path);
   assertSchemaType(html, path, ["Restaurant", "BarOrPub", "LocalBusiness"]);
   assert.ok(html.includes("hello@dallascircle.com"), `${path} should expose the correction contact.`);
@@ -155,27 +160,21 @@ for (const path of placePaths) {
 const robots = await getPage("/robots.txt");
 assert.match(robots, /User-agent:\s*\*/i, "robots.txt should define default crawler rules.");
 assert.match(robots, /User-agent:\s*OAI-SearchBot[\s\S]*?Allow:\s*\//i, "robots.txt should explicitly allow OAI-SearchBot.");
-assert.ok(robots.includes(new URL("/sitemap.xml", base).href), "robots.txt should reference the canonical sitemap URL.");
+assert.ok(robots.includes(canonicalUrl("/sitemap.xml")), "robots.txt should reference the canonical sitemap URL.");
 
 const sitemapXml = await getPage("/sitemap.xml");
 const sitemapUrls = parseSitemap(sitemapXml);
-const sitemapSet = new Set(sitemapUrls.map((url) => url.pathname));
+const sitemapPaths = new Set(sitemapUrls.map((url) => url.pathname));
 for (const path of ["/", "/about", "/faq", guidePath, ...placePaths]) {
-  assert.ok(sitemapSet.has(path), `Sitemap should include required published route ${path}`);
+  assert.ok(sitemapPaths.has(path), `Sitemap should include required published route ${path}`);
 }
 
 const crawledHtml = new Map();
-for (const url of sitemapUrls) {
-  const html = url.pathname === "/"
-    ? homepage
-    : url.pathname === guidePath
-      ? guide
-      : placePaths.includes(url.pathname)
-        ? await getPage(url)
-        : await getPage(url);
-  assertCanonical(html, url.href);
-  assertPageMetadata(html, url.pathname);
-  crawledHtml.set(url.pathname, html);
+for (const sitemapUrl of sitemapUrls) {
+  const html = await getPage(sitemapUrl.pathname);
+  assertCanonical(html, canonicalUrl(sitemapUrl.pathname));
+  assertPageMetadata(html, sitemapUrl.pathname);
+  crawledHtml.set(sitemapUrl.pathname, html);
 }
 
 const internalPaths = new Set([...crawledHtml.values()].flatMap(getLocalLinkPaths));
@@ -198,5 +197,5 @@ assert.ok([301, 308].includes(redirect.status), `${retiredPath} should permanent
 assert.equal(new URL(redirect.headers.get("location") ?? "", base).pathname, "/", "Retired path should redirect to the homepage.");
 
 console.log(
-  `Route verification passed for ${base.origin}: ${sitemapUrls.length} sitemap URLs and ${internalPaths.size} internal link paths checked.`,
+  `Route verification passed for app origin ${base.origin} using canonical origin ${canonicalBase.origin}: ${sitemapUrls.length} sitemap URLs and ${internalPaths.size} internal link paths checked.`,
 );
