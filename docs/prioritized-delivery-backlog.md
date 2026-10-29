@@ -2,10 +2,12 @@
 
 **Baseline:** Vision & Business Strategy dated 22 October 2026; High-Level Product & Architecture Requirements.  
 **Working branch:** `seo/technical-foundation`  
-**Product boundary:** DallasCircle is exclusively a hyperlocal discovery platform for Dallas, beginning with Deep Ellum. No technical consulting, software modernization, or agency services belong in the product.  
+**Product boundary:** DallasCircle is an editorial-led local discovery platform for Dallas localities and a broad range of local topics. Deep Ellum is the first complete launch area, not the permanent geographic boundary. No technical consulting, software modernization, or agency services belong in the product.  
 **Delivery principle:** one small, verifiable vertical slice at a time. Do not merge or deploy until build, route, security, and SEO checks have been run.
 
 ## P0 — Foundation gates
+
+- [ ] **DC-00 — Align the product experience and locality information architecture.** Shape the homepage as an editorial local guide inspired by DailyDFW's breadth and scannability, with DallasCircle's own visual identity. Define global topic navigation, locality browsing, locality/topic page hierarchy, mobile behavior, and a coverage matrix. Build reusable UI components, but publish/index only localities and topics that meet meaningful coverage thresholds.
 
 - [ ] **DC-01 — Complete product identity and route cleanup.** Align homepage, metadata, navigation, About, FAQ, and sitemap with the Deep Ellum local-discovery proposition. Remove legacy service pages, components, endpoints, lead capture, unsupported claims, and orphaned links. Keep only redirects needed to retire old inbound URLs safely. Initial cleanup is committed; full source/link and live-route validation remains outstanding.
 - [ ] **DC-02 — Audit the real Supabase schema, RLS, grants, and existing data.** Inspect tables, policies, grants, constraints, and public access with the actual project. Do not claim a deployed vulnerability until verified. Do not restore public data APIs or add migrations before this audit.
@@ -25,7 +27,7 @@
 
 ## P2 — Deferred until evidence supports it
 
-- [ ] **DC-13 — Replicate the model into another Dallas neighborhood.**
+- [ ] **DC-13 — Expand locality and topic coverage in controlled waves.** Add additional Dallas neighborhoods/localities and topic hubs based on the coverage matrix, verified inventory, audience demand, and editorial maintenance capacity. Do not mass-generate empty locality/topic pages.
 - [ ] **DC-14 — Events and itinerary planning with dependable official-source freshness.**
 - [ ] **DC-15 — Merchant software, memberships, marketplace, rewards, or broad DFW directory.**
 
@@ -51,5 +53,5 @@
 
 - Legacy public service pages, service-specific endpoints, scanner component, and generic business API routes have been removed from this branch. Full repository reference scan and live-route checks remain outstanding.
 - Public write/API endpoints remain disconnected. The new server-rendered place and guide pages use a read-only anonymous Supabase client constrained by RLS and explicit grants. Initial live audit found 14 empty legacy tables with RLS enabled but no policies; current anon/authenticated grants and postgres-owned defaults were hardened. The historical baseline has been restored from the live migration record. The `supabase_admin` default ACL remains broad, but the live DDL event trigger now applies fail-closed RLS/grant hardening to newly created public objects; its rollback test passed. An authorized superuser/role-owner fix for the underlying ACL remains desirable. See `docs/supabase-security-audit.md`.
-- Place and guide routes now exist on the branch. Supabase contains three published place profiles and one published guide, each with official source records; live-domain verification and deployment remain outstanding. Categories are normalized, but category landing pages should wait until there is enough useful, verified inventory to support them.
+- Place and guide routes now exist on the branch. Supabase contains three published place profiles and one published guide, each with official source records; live-domain verification and deployment remain outstanding. Categories are normalized. The homepage and locality/topic navigation architecture should be designed for future breadth, but category/locality landing pages must wait until there is enough useful, verified inventory to support them.
 - GitHub Actions passed locked dependency installation, lint, and production build on implementation head `d763f7163eaea91a7bb8f5ccbc1f1e1878e724df` ([run](https://github.com/blockrao/dcircle/actions/runs/40721850685)). Full route/link tests and deployed HTTP crawl remain outstanding.
