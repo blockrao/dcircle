@@ -38,6 +38,8 @@ type Place = {
   name: string;
   summary: string | null;
   neighborhood_id: string | null;
+  price_level: number | null;
+  categories: string[];
 };
 
 type Guide = {
@@ -59,7 +61,7 @@ async function getExploreData() {
       .order("name", { ascending: true }),
     supabase
       .from("places")
-      .select("id,slug,name,summary,neighborhood_id")
+      .select("id,slug,name,summary,neighborhood_id,price_level")
       .eq("publication_status", "published")
       .not("published_at", "is", null)
       .order("name", { ascending: true }),
@@ -88,14 +90,34 @@ async function getExploreData() {
   }
 
   const places = placeRows.filter((place) => eligiblePlaceIds.has(place.id));
+  const [placeCategoriesResult, categoriesResult] = places.length
+    ? await Promise.all([
+        supabase.from("place_categories").select("place_id,category_id").in("place_id", places.map((place) => place.id)),
+        supabase.from("categories").select("id,name").eq("is_active", true),
+      ])
+    : [{ data: [], error: null }, { data: [], error: null }];
+  if (placeCategoriesResult.error || categoriesResult.error) {
+    return { neighborhoods: [] as Neighborhood[], places: [] as Place[], guides: [] as Guide[], loadError: true };
+  }
+  const categoryNames = new Map((categoriesResult.data ?? []).map((category) => [category.id, category.name]));
+  const categoriesByPlace = new Map<string, string[]>();
+  for (const link of placeCategoriesResult.data ?? []) {
+    const name = categoryNames.get(link.category_id);
+    if (!name) continue;
+    categoriesByPlace.set(link.place_id, [...(categoriesByPlace.get(link.place_id) ?? []), name]);
+  }
+  const placesWithCategories = places.map((place) => ({
+    ...place,
+    categories: [...new Set(categoriesByPlace.get(place.id) ?? [])],
+  }));
   const eligibleNeighborhoods = neighborhoods.filter(
     (neighborhood) =>
-      places.filter((place) => place.neighborhood_id === neighborhood.id).length >= MINIMUM_ELIGIBLE_PLACES,
+      placesWithCategories.filter((place) => place.neighborhood_id === neighborhood.id).length >= MINIMUM_ELIGIBLE_PLACES,
   );
 
   const guideIds = guideRows.map((guide) => guide.id);
   if (guideIds.length === 0) {
-    return { neighborhoods: eligibleNeighborhoods, places, guides: [] as Guide[], loadError: false };
+    return { neighborhoods: eligibleNeighborhoods, places: placesWithCategories, guides: [] as Guide[], loadError: false };
   }
 
   const [guideSourcesResult, guidePlacesResult] = await Promise.all([
@@ -117,7 +139,7 @@ async function getExploreData() {
     (guide) => sourcedGuideIds.has(guide.id) && guidesWithEligiblePlaces.has(guide.id),
   );
 
-  return { neighborhoods: eligibleNeighborhoods, places, guides, loadError: false };
+  return { neighborhoods: eligibleNeighborhoods, places: placesWithCategories, guides, loadError: false };
 }
 
 export default async function ExplorePage() {
@@ -147,6 +169,8 @@ export default async function ExplorePage() {
       description: item.summary?.trim() || "Source-backed local place profile and official links.",
       href: `/places/${item.slug}`,
       context: data.neighborhoods.find((neighborhood) => neighborhood.id === item.neighborhood_id)?.name,
+      categories: item.categories,
+      priceLevel: item.price_level,
     })),
   ];
   const items = [

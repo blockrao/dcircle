@@ -180,6 +180,8 @@ assertPageMetadata(explore, explorePath);
 assert.ok(explore.includes("Search the verified collection"), "Explore should expose the accessible collection search.");
 assert.ok(explore.includes("Search places, guides, and neighborhoods"), "Explore search should have an accessible search label.");
 assert.ok(explore.includes("Everything") && explore.includes("Neighborhoods") && explore.includes("Guides") && explore.includes("Places"), "Explore should expose all content-type filters.");
+assert.ok(explore.includes("Place category") && explore.includes("All categories"), "Explore should expose structured place-category filtering.");
+assert.ok(explore.includes("Price level") && explore.includes("Any price level"), "Explore should expose structured price-level filtering.");
 assertSchemaType(explore, explorePath, ["CollectionPage"]);
 assertCanonicalEntityIds(explore, explorePath);
 assert.ok(explore.includes(neighborhoodPath), "Explore hub should link to the eligible neighborhood page.");
