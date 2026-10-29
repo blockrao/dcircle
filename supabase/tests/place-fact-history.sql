@@ -62,6 +62,26 @@ BEGIN
     (test_place_id, test_source_id, 'test_fact', '"before"'::jsonb, 'unverified', now())
   RETURNING id INTO test_fact_id;
 
+  SELECT count(*) INTO history_count
+  FROM dcircle_private.place_fact_history
+  WHERE fact_id = test_fact_id AND operation = 'INSERT';
+
+  IF history_count <> 1 THEN
+    RAISE EXCEPTION 'Expected one insert history record, got %', history_count;
+  END IF;
+
+  SELECT * INTO history_row
+  FROM dcircle_private.place_fact_history
+  WHERE fact_id = test_fact_id AND operation = 'INSERT'
+  ORDER BY changed_at DESC
+  LIMIT 1;
+
+  IF history_row.old_fact IS NOT NULL
+    OR history_row.new_fact -> 'fact_value' <> '"before"'::jsonb
+  THEN
+    RAISE EXCEPTION 'Insert history did not preserve the initial fact value';
+  END IF;
+
   UPDATE public.place_facts
   SET fact_value = '"after"'::jsonb,
       verification_status = 'verified',
