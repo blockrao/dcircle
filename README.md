@@ -42,7 +42,7 @@ With the local development server running, use a second terminal for the route/S
 SITE_URL=http://localhost:3000 CANONICAL_SITE_URL=https://dallascircle.com npm run check:live
 ```
 
-The verifier checks HTTP status, canonical URLs, titles/descriptions, JSON-LD parsing and page types, sitemap uniqueness and coverage, robots rules, internal links, source/correction context, and the retired-path redirect. It fetches pages from `SITE_URL` but expects public canonical URLs to use `CANONICAL_SITE_URL`, allowing local validation without changing the production canonical host.
+The verifier checks HTTP status, canonical URLs, titles/descriptions, JSON-LD parsing and page types, sitemap uniqueness and coverage, robots rules, internal links and redirect chains/loops, source/correction context, and the retired-path redirect. It fetches pages from `SITE_URL` but expects public canonical URLs to use `CANONICAL_SITE_URL`, allowing local validation without changing the production canonical host.
 
 When a staging environment is eventually available, run the same verifier against it:
 
