@@ -7,7 +7,6 @@ import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 
-export const instant = false;
 
 type PageProps = { params: Promise<{ slug: string }> };
 
