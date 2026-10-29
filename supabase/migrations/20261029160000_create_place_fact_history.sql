@@ -11,21 +11,23 @@ CREATE TABLE dcircle_private.place_fact_history (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   place_id uuid NOT NULL,
   fact_id uuid NOT NULL,
-  operation text NOT NULL CHECK (operation IN ('UPDATE', 'DELETE')),
-  old_fact jsonb NOT NULL,
+  operation text NOT NULL CHECK (operation IN ('INSERT', 'UPDATE', 'DELETE')),
+  old_fact jsonb,
   new_fact jsonb,
   changed_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   actor_role text,
   actor_subject text,
+  change_reason text,
   session_user_name text NOT NULL DEFAULT session_user::text,
   CHECK (
-    (operation = 'UPDATE' AND new_fact IS NOT NULL)
-    OR (operation = 'DELETE' AND new_fact IS NULL)
+    (operation = 'INSERT' AND old_fact IS NULL AND new_fact IS NOT NULL)
+    OR (operation = 'UPDATE' AND old_fact IS NOT NULL AND new_fact IS NOT NULL)
+    OR (operation = 'DELETE' AND old_fact IS NOT NULL AND new_fact IS NULL)
   )
 );
 
 COMMENT ON TABLE dcircle_private.place_fact_history IS
-  'Private before/after audit records for updates and deletions of canonical place_facts. Never expose through public APIs.';
+  'Private before/after audit records for inserts, updates, and deletions of canonical place_facts. Never expose through public APIs.';
 
 CREATE INDEX place_fact_history_place_changed_idx
   ON dcircle_private.place_fact_history (place_id, changed_at DESC);
@@ -45,62 +47,64 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = pg_catalog
 AS $function$
+DECLARE
+  old_value jsonb;
+  new_value jsonb;
+  affected_place_id uuid;
+  affected_fact_id uuid;
 BEGIN
-  IF TG_OP = 'UPDATE' THEN
-    IF OLD IS DISTINCT FROM NEW THEN
-      INSERT INTO dcircle_private.place_fact_history (
-        place_id,
-        fact_id,
-        operation,
-        old_fact,
-        new_fact,
-        actor_role,
-        actor_subject,
-        session_user_name
-      )
-      VALUES (
-        OLD.place_id,
-        OLD.id,
-        'UPDATE',
-        to_jsonb(OLD),
-        to_jsonb(NEW),
-        COALESCE(
-          NULLIF(current_setting('request.jwt.claim.role', true), ''),
-          NULLIF(current_setting('role', true), '')
-        ),
-        NULLIF(current_setting('request.jwt.claim.sub', true), ''),
-        session_user::text
-      );
+  IF TG_OP = 'INSERT' THEN
+    old_value := NULL;
+    new_value := to_jsonb(NEW);
+    affected_place_id := NEW.place_id;
+    affected_fact_id := NEW.id;
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF OLD IS NOT DISTINCT FROM NEW THEN
+      RETURN NEW;
     END IF;
-    RETURN NEW;
+    old_value := to_jsonb(OLD);
+    new_value := to_jsonb(NEW);
+    affected_place_id := NEW.place_id;
+    affected_fact_id := NEW.id;
   ELSIF TG_OP = 'DELETE' THEN
-    INSERT INTO dcircle_private.place_fact_history (
-      place_id,
-      fact_id,
-      operation,
-      old_fact,
-      new_fact,
-      actor_role,
-      actor_subject,
-      session_user_name
-    )
-    VALUES (
-      OLD.place_id,
-      OLD.id,
-      'DELETE',
-      to_jsonb(OLD),
-      NULL,
-      COALESCE(
-        NULLIF(current_setting('request.jwt.claim.role', true), ''),
-        NULLIF(current_setting('role', true), '')
-      ),
-      NULLIF(current_setting('request.jwt.claim.sub', true), ''),
-      session_user::text
-    );
-    RETURN OLD;
+    old_value := to_jsonb(OLD);
+    new_value := NULL;
+    affected_place_id := OLD.place_id;
+    affected_fact_id := OLD.id;
+  ELSE
+    RETURN NULL;
   END IF;
 
-  RETURN NULL;
+  INSERT INTO dcircle_private.place_fact_history (
+    place_id,
+    fact_id,
+    operation,
+    old_fact,
+    new_fact,
+    actor_role,
+    actor_subject,
+    change_reason,
+    session_user_name
+  )
+  VALUES (
+    affected_place_id,
+    affected_fact_id,
+    TG_OP,
+    old_value,
+    new_value,
+    COALESCE(
+      NULLIF(current_setting('request.jwt.claim.role', true), ''),
+      NULLIF(current_setting('role', true), '')
+    ),
+    NULLIF(current_setting('request.jwt.claim.sub', true), ''),
+    NULLIF(current_setting('app.change_reason', true), ''),
+    session_user::text
+  );
+
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+  RETURN NEW;
 END;
 $function$;
 
@@ -110,6 +114,6 @@ REVOKE ALL ON FUNCTION dcircle_private.capture_place_fact_history() FROM PUBLIC,
 
 DROP TRIGGER IF EXISTS place_facts_capture_history ON public.place_facts;
 CREATE TRIGGER place_facts_capture_history
-  AFTER UPDATE OR DELETE ON public.place_facts
+  AFTER INSERT OR UPDATE OR DELETE ON public.place_facts
   FOR EACH ROW
   EXECUTE FUNCTION dcircle_private.capture_place_fact_history();
