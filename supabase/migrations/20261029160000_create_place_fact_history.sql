@@ -1,8 +1,13 @@
 -- Private audit history for changes to canonical place facts.
 -- Additive only: this does not change current fact eligibility or public read behavior.
--- Do not apply to production until the migration and rollback-only regression test are reviewed.
+-- Do not apply to production until migration sequencing, SQL review, and regression tests pass.
 
-CREATE TABLE public.place_fact_history (
+-- Keep audit objects outside Supabase's exposed public schema.
+-- Use a dedicated schema so this migration does not alter grants on an existing private schema.
+CREATE SCHEMA dcircle_private;
+REVOKE ALL ON SCHEMA dcircle_private FROM PUBLIC, anon, authenticated, service_role;
+
+CREATE TABLE dcircle_private.place_fact_history (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   place_id uuid NOT NULL,
   fact_id uuid NOT NULL,
@@ -19,22 +24,22 @@ CREATE TABLE public.place_fact_history (
   )
 );
 
-COMMENT ON TABLE public.place_fact_history IS
+COMMENT ON TABLE dcircle_private.place_fact_history IS
   'Private before/after audit records for updates and deletions of canonical place_facts. Never expose through public APIs.';
 
 CREATE INDEX place_fact_history_place_changed_idx
-  ON public.place_fact_history (place_id, changed_at DESC);
+  ON dcircle_private.place_fact_history (place_id, changed_at DESC);
 
 CREATE INDEX place_fact_history_fact_changed_idx
-  ON public.place_fact_history (fact_id, changed_at DESC);
+  ON dcircle_private.place_fact_history (fact_id, changed_at DESC);
 
-ALTER TABLE public.place_fact_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dcircle_private.place_fact_history ENABLE ROW LEVEL SECURITY;
 
 -- No table privileges or RLS policies for API roles, including service_role.
--- The trigger function writes audit rows using its owner privileges.
-REVOKE ALL ON TABLE public.place_fact_history FROM PUBLIC, anon, authenticated, service_role;
+-- The private trigger function writes audit rows using its owner privileges.
+REVOKE ALL ON TABLE dcircle_private.place_fact_history FROM PUBLIC, anon, authenticated, service_role;
 
-CREATE OR REPLACE FUNCTION public.capture_place_fact_history()
+CREATE OR REPLACE FUNCTION dcircle_private.capture_place_fact_history()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -43,7 +48,7 @@ AS $function$
 BEGIN
   IF TG_OP = 'UPDATE' THEN
     IF OLD IS DISTINCT FROM NEW THEN
-      INSERT INTO public.place_fact_history (
+      INSERT INTO dcircle_private.place_fact_history (
         place_id,
         fact_id,
         operation,
@@ -69,7 +74,7 @@ BEGIN
     END IF;
     RETURN NEW;
   ELSIF TG_OP = 'DELETE' THEN
-    INSERT INTO public.place_fact_history (
+    INSERT INTO dcircle_private.place_fact_history (
       place_id,
       fact_id,
       operation,
@@ -99,10 +104,12 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.capture_place_fact_history() FROM PUBLIC, anon, authenticated, service_role;
+-- SECURITY DEFINER is required only for the trigger's internal audit write.
+-- Keep the function in the non-exposed schema and revoke direct invocation.
+REVOKE ALL ON FUNCTION dcircle_private.capture_place_fact_history() FROM PUBLIC, anon, authenticated, service_role;
 
 DROP TRIGGER IF EXISTS place_facts_capture_history ON public.place_facts;
 CREATE TRIGGER place_facts_capture_history
   AFTER UPDATE OR DELETE ON public.place_facts
   FOR EACH ROW
-  EXECUTE FUNCTION public.capture_place_fact_history();
+  EXECUTE FUNCTION dcircle_private.capture_place_fact_history();
