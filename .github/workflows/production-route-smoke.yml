@@ -1,13 +1,15 @@
 name: Production route smoke check
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: production-route-smoke
+  group: production-route-smoke-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -28,6 +30,7 @@ jobs:
         run: node --check scripts/verify-live-routes.mjs
 
       - name: Verify the live production site
+        if: github.event_name == 'workflow_dispatch'
         env:
           SITE_URL: https://dallascircle.com
           CANONICAL_SITE_URL: https://dallascircle.com
