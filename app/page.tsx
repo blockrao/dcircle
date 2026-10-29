@@ -111,6 +111,9 @@ export default async function HomePage() {
             <a href="#our-approach" className="inline-flex items-center justify-center rounded-lg border border-slate-600 px-6 py-3 font-semibold text-white transition hover:border-slate-400">
               How we research
             </a>
+            <Link href="/explore" className="inline-flex items-center justify-center rounded-lg border border-amber-400/60 px-6 py-3 font-semibold text-amber-200 transition hover:bg-amber-400/10">
+              Explore all coverage
+            </Link>
           </div>
           <p className="mt-8 max-w-xl text-sm leading-6 text-slate-400">
             We’re building this guide carefully. We won’t pretend to have visited a
