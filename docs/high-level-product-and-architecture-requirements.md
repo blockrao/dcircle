@@ -21,7 +21,11 @@ The technical advantage should be a **trustworthy, structured, freshness-aware l
 
 The vision document is explicit that the first milestone is a credible, useful Deep Ellum product—not a large platform. Build the minimum architecture that makes the initial product reliable and creates a clean path to later expansion. Defer complex platform features until audience behavior and willingness to pay justify them.
 
-## 2. Product principles and hard constraints
+## 2. Mandatory pre-execution product and architecture review
+
+Before a material product, code, content, SEO, database, security, infrastructure, or release step is executed, the lead internet architect/product manager must vet it against the strategy, exceptional discoverability goals, user outcome, evidence quality, canonical entity integrity, publication rules, security/privacy, performance, maintainability, cost, and rollback risk. The review must establish the recommended approach, alternatives where relevant, acceptance criteria, verification plan, and whether explicit user approval is required. This is a required gate, not an optional review after implementation. Follow [`docs/architecture-and-product-review-gate.md`](./architecture-and-product-review-gate.md). Safe and reversible work may proceed after review; production cutovers, destructive migrations, high-impact permission changes, material costs, and irreversible actions require the appropriate explicit approval.
+
+## 3. Product principles and hard constraints
 
 1. **Build for breadth, launch with depth:** design topic/locality navigation for the long-term product, but prove quality with Deep Ellum and the night-out use case first.
 2. **Usefulness over page count:** A small set of high-quality, complete pages beats thousands of thin programmatic pages.
@@ -34,7 +38,7 @@ The vision document is explicit that the first milestone is a credible, useful D
 9. **Search is an acquisition channel, not the product itself:** Optimize for real user decisions; do not promise rankings or AI citations.
 10. **Expand coverage in measured waves:** the product is intended to cover Dallas localities and many local topics, but indexable pages require meaningful, source-backed inventory and repeatable freshness operations. Merchant software, rewards, apps, and marketplaces require separate evidence.
 
-## 3. Users and jobs to be done
+## 4. Users and jobs to be done
 
 ### Primary consumer
 
@@ -63,7 +67,7 @@ Jobs:
 
 A remote researcher/editor who needs to create trustworthy pages efficiently, record sources, revisit stale facts, correct errors, publish guides, and measure audience and merchant response.
 
-## 4. Canonical merchant and founder profiles
+## 5. Canonical merchant and founder profiles
 
 Every eligible published merchant must have one stable, permanent canonical profile URL backed by one canonical entity record. All guides, articles, locality/topic pages, collections, and ranked lists must reference that same merchant identity and URL. Merchant categories and locality memberships are structured relationships used for browsing and filters; filter variants must not create duplicate merchant profiles. Stable entity IDs, source-backed facts, freshness, corrections, publication state, and structured data must be generated from the same canonical source. Slug changes require permanent redirects and consistent internal links, canonicals, and sitemap updates.
 
@@ -71,7 +75,7 @@ Use the most specific truthful Schema.org LocalBusiness subtype and a stable ent
 
 Founder profiles are a distinct, optional canonical Person entity. Publish only with explicit opt-in from the founder or an authorized representative, verified identity and founder/co-founder relationship, recorded consent for biography/photo use, and a meaningful editorial profile. Founder, current owner, promoter, CEO, and operator are distinct roles. Link a founder to one or more merchant entities with explicit relationship roles and evidence. Participation does not buy favorable coverage or inclusion. Full rules and acceptance criteria: `docs/canonical-merchant-and-founder-architecture.md`.
 
-## 4. Differentiation: where the technical advantage comes from
+## 6. Differentiation: where the technical advantage comes from
 
 The advantage is not a particular framework, a schema markup trick, or an AI-generated page count. It comes from compounding data quality and decision usefulness.
 
@@ -112,7 +116,7 @@ Create content that solves a decision: “where to eat before a show at [venue],
 
 ---
 
-## 5. Prioritized requirements
+## 7. Prioritized requirements
 
 Priority definitions:
 - **P0 — Foundation / launch blocker:** required for a trustworthy initial product.
@@ -275,7 +279,7 @@ Consider lightweight business correction tools, paid recurring merchant products
 
 ---
 
-## 6. Technical architecture principles
+## 8. Technical architecture principles
 
 Use the current repository's Next.js/TypeScript and Supabase/PostgreSQL direction as a pragmatic starting point, subject to compatibility and security validation.
 
@@ -307,7 +311,7 @@ Use the current repository's Next.js/TypeScript and Supabase/PostgreSQL directio
 
 ---
 
-## 7. Explicit non-goals for the first release
+## 9. Explicit non-goals for the first release
 
 Do not build these before the initial product demonstrates demand:
 - mass-generating thin or empty locality/topic pages to simulate coverage;
@@ -319,7 +323,7 @@ Do not build these before the initial product demonstrates demand:
 - automated reviews, fabricated popularity signals, or unverified AI-written descriptions;
 - guarantees of rankings, traffic, AI citations, revenue, or performance outcomes.
 
-## 8. Phase gates and definition of done
+## 10. Phase gates and definition of done
 
 ### Gate 1 — Credible product
 - Positioning is consistent.
@@ -347,7 +351,7 @@ Do not build these before the initial product demonstrates demand:
 
 Phase 1 does not require a predetermined traffic number or revenue outcome. The objective is to create a credible product and make an evidence-based decision about the next investment.
 
-## 9. Immediate engineering sequence
+## 11. Immediate engineering sequence
 
 1. Align the editorial homepage, topic navigation, locality discovery, and initial Deep Ellum content with the approved product direction.
 2. Audit existing routes and remove or repair links to non-existent article/category/search destinations.
@@ -360,7 +364,7 @@ Phase 1 does not require a predetermined traffic number or revenue outcome. The 
 9. Publish the first 15 profiles and the three core guides only after editorial verification.
 10. Review evidence before building further platform features.
 
-## 10. Architectural success metric
+## 12. Architectural success metric
 
 The long-term technical moat is a compounding, trusted local dataset and editorial workflow that can answer a specific local decision better than a generic list. Measure it by:
 - source coverage and freshness of critical facts;
