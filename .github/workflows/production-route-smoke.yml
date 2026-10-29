@@ -4,6 +4,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '23 11 * * 1'
 
 permissions:
   contents: read
@@ -30,7 +32,7 @@ jobs:
         run: node --check scripts/verify-live-routes.mjs
 
       - name: Verify the live production site
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name != 'pull_request'
         env:
           SITE_URL: https://dallascircle.com
           CANONICAL_SITE_URL: https://dallascircle.com
