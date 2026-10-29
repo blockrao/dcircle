@@ -35,7 +35,7 @@ Expand into broader local topics and localities—such as food and drink, arts a
 1. Reconcile local Git state safely; do not discard uncommitted work.
 2. Run current branch install, lint/type checks, and production build.
 3. Run the live-route verifier against a local server and fix actual failures: HTTP status, canonical URLs, title/description uniqueness, JSON-LD parity, robots, sitemap eligibility, internal links, redirects, source/correction context.
-4. Resolve the outstanding Supabase default-privilege ACL through an authorized role-owner/superuser path, or document the exact residual risk and make an explicit release decision. Do not silently treat the event-trigger mitigation as equivalent to correcting the underlying ACL.
+4. Verify the supported Supabase permission posture: confirm the `supabase_admin` default ACL is platform-managed and not changeable through the project `postgres` role; verify the enabled fail-closed DDL trigger, `postgres` defaults, canonical-table RLS/policies, and actual anonymous grants. Current catalog checks passed on 29 October 2026. Keep the ACL limitation documented, recheck after platform/schema changes, and do not treat an unsupported role-owner/superuser change as a required release task.
 5. Keep the legacy-table retirement migration staged until route/form/dependency checks and release gates pass.
 6. Do not deploy or merge based solely on a successful build.
 
