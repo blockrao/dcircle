@@ -2,6 +2,7 @@
 
 **Status:** Active implementation requirements; subordinate to the strategic baseline  
 **Strategic baseline:** [`docs/vision-and-strategic-direction.md`](./vision-and-strategic-direction.md)  
+**Execution sequence:** [`docs/roadmap-and-discoverability-operating-plan.md`](./roadmap-and-discoverability-operating-plan.md)  
 **Original vision source:** *DallasCircle.com — Vision, Business Strategy & Execution Plan*, dated 22 October 2026  
 **Repository:** `blockrao/dcircle`  
 **Initial launch wedge:** Deep Ellum nightlife and night-out planning  
