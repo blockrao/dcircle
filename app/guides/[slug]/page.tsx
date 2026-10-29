@@ -94,6 +94,7 @@ export default async function GuidePage({ params }: PageProps) {
   ]);
 
   if (linksResult.error || sourcesResult.error) throw new Error("Unable to load guide sources and place links.");
+  if (!linksResult.data?.length || !sourcesResult.data?.length) notFound();
   const placeIds = [...new Set((linksResult.data ?? []).map((link) => link.place_id))];
   const placesResult = placeIds.length
     ? await supabase
@@ -103,6 +104,7 @@ export default async function GuidePage({ params }: PageProps) {
         .eq("publication_status", "published")
     : { data: [], error: null };
   if (placesResult.error) throw new Error("Unable to load guide places.");
+  if (!placesResult.data?.length) notFound();
 
   const placesById = new Map((placesResult.data ?? []).map((place) => [place.id, place]));
   const structuredData = {
