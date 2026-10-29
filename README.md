@@ -8,7 +8,7 @@ The product must not imply firsthand visits or publish unsupported claims. Use r
 
 ## Strategic baseline
 
-The product and architecture decision record is [`docs/vision-and-strategic-direction.md`](docs/vision-and-strategic-direction.md). It defines the vision, mission, intended SEO/discoverability advantage, architecture choice, repository reuse policy, and release priorities. The detailed requirements and delivery documents must remain consistent with it.
+The product and architecture decision record is [`docs/vision-and-strategic-direction.md`](docs/vision-and-strategic-direction.md). It defines the vision, mission, intended SEO/discoverability advantage, architecture choice, repository reuse policy, release priorities, and the standing mandate for ChatGPT to act as lead internet architect and product manager. The detailed requirements and delivery documents must remain consistent with it.
 
 ## Product boundaries
 
