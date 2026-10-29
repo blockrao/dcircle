@@ -2,9 +2,11 @@
 
 **Status:** Active product and architecture decision baseline  
 **Decision date:** 29 October 2026  
-**Positioning:** **DallasCircle — Deep Ellum for the night out.**  
+**Positioning:** **DallasCircle — local life, clearly discovered.**  
+**Initial wedge:** Deep Ellum nightlife and night-out planning  
+**Long-term scope:** A broad, locality-aware guide to places, topics, services, culture, events, and community information across Dallas and its localities  
 **Operating model:** Remote-first, editorial-led digital product  
-**Initial market:** Deep Ellum, Dallas, Texas
+**Initial market:** Deep Ellum, Dallas, Texas; expansion is staged by verified coverage
 
 This document records the strategic direction that all product, engineering, SEO, content, and infrastructure decisions must support. The long-form business strategy and execution plan is maintained as a companion project artifact; this concise decision record is the repository's authoritative strategic baseline. Implementation requirements, delivery backlog, and audits must remain consistent with it.
 
@@ -42,7 +44,7 @@ The assistant leads analysis, recommendations, planning, implementation support,
 
 ## 1. Vision
 
-Become a trusted digital guide to experiencing Dallas, helping people discover places, plan activities, and make better local decisions—beginning with the practical needs of a night out in Deep Ellum.
+Become a trusted, easy-to-navigate guide to local life across Dallas and its distinct neighborhoods and localities. People should be able to discover what is happening, where to go, what matters locally, and how to make practical decisions—across a broad range of topics. Begin with a focused Deep Ellum night-out experience, but build the information architecture and visual language to expand responsibly into a city-wide, locality-aware editorial discovery platform.
 
 ## 2. Mission
 
@@ -50,7 +52,7 @@ Turn fragmented local information into useful, occasion-based recommendations th
 
 ## 3. Product goal
 
-Build the most useful, trustworthy discovery experience for the specific Deep Ellum night-out use cases we choose to serve. Earn repeat use and search visibility through better information, decision usefulness, reliable technical delivery, and a maintained relationship with the audience—not through page volume alone.
+Build a broad local discovery experience that feels like a useful local publication and guide, not a bare directory. Visitors should be able to browse a range of relevant local topics and switch context by neighborhood/locality. Earn repeat use and search visibility through useful editorial coverage, reliable local information, source transparency, and a strong browsing experience—not page volume alone. Deep Ellum is the first launch wedge and quality proving ground, not the permanent geographic limit.
 
 ## 4. The intended unfair advantage
 
@@ -69,18 +71,43 @@ Search discoverability is paramount, but rankings, indexing, rich results and AI
 ## 5. Product boundaries
 
 ### Initial focus
-- Deep Ellum and the night-out use case.
+- A polished, editorial-style homepage with clear topic navigation and locality discovery.
+- Deep Ellum and the night-out use case as the first complete, well-researched coverage area.
+- An information architecture that can accommodate a broad range of topics and every planned Dallas locality without redesigning the product.
 - A small set of high-quality guides and researched place profiles.
 - Source-backed facts, explicit uncertainty, correction pathways and clear sponsorship disclosures.
 - Mobile usability, fast and reliable pages, and a repeatable editorial workflow.
 - Measurement of search discovery and meaningful user actions.
 
 ### Out of scope until evidence justifies a change
-- A broad Dallas directory or thin programmatic SEO.
+- Unsubstantiated blanket coverage claims or thin, automatically generated locality/topic pages. Broad Dallas coverage is a product ambition, but each page must earn publication through meaningful, verified coverage.
 - Merchant dashboards, claims workflows, marketplace features or public write APIs.
 - A native mobile app, loyalty platform, complex recommendation AI or separate search service.
 - A CMS, second database, ORM migration or large new infrastructure layer without a demonstrated need.
 - Technical consulting, agency services, or software-service offers inside the consumer product.
+
+## 5A. Experience and locality strategy
+
+**Product decision:** The experience should take inspiration from the breadth, scannability, and editorial entry points of DailyDFW, while using DallasCircle's own design system, voice, content standards, and product identity. The reference is an information-architecture and browsing inspiration—not a pixel-copy target.
+
+### Experience principles
+- **Editorial-first homepage:** a clear lead story/guide, recent or timely local items where we can maintain them, topic entry points, locality discovery, and curated collections. Avoid a homepage that is only a search box or a grid of business listings.
+- **Breadth with hierarchy:** expose topic families such as Food & Drink, Things to Do, Arts & Culture, Events, Neighborhood Guides, Parks & Outdoors, Local News & Updates, Family, Shopping, and Practical Local Information as inventory and editorial capacity support them. These are intended taxonomy directions, not a claim that every section is already populated or live.
+- **Locality as a first-class dimension:** users should be able to select or browse a locality and then see relevant topics, guides, places, and timely items for that area.
+- **Consistent global navigation:** topic and locality navigation must work on mobile, be keyboard accessible, and use crawlable links for important destinations.
+- **Useful landing pages:** each locality or topic landing page needs unique local value, clear scope, internal links, and enough reviewed inventory to justify publication.
+- **No empty-shell SEO:** planned coverage does not justify publishing thin pages. Show unavailable/coming-soon coverage in the UI if useful, but do not automatically index empty pages.
+- **Editorial trust:** label dates, source context, corrections, sponsored content, and uncertainty where relevant. Do not fabricate local reporting or firsthand experience.
+
+### Locality coverage model
+
+Treat the locality list as a managed coverage plan, not a list of URLs to generate. Maintain a locality registry with canonical name/slug, parent geography, boundaries or geographic references where verified, coverage status, supported topic areas, linked canonical entities, source inventory, and editorial owner/review cadence. Use one consistent locality identifier across profiles, guides, feeds, navigation, metadata, and future maps/search. Do not confuse neighborhoods, cities, districts, and counties; model their type and parent relationship explicitly.
+
+Roll out locality pages only when a locality meets a defined minimum viable coverage threshold. Track coverage by locality × topic and make gaps visible to the editorial team. The long-term goal is coverage across Dallas localities; launch order and indexability should follow actual verified inventory and maintenance capacity.
+
+### UI implementation approach
+
+Keep the existing Next.js, TypeScript, Tailwind, and Supabase foundation. Build reusable components for editorial story cards, topic navigation, locality navigation/selector, curated collection blocks, freshness/source cues, and responsive content grids. Do not add a second database or import a generic directory template. Establish the page hierarchy and responsive visual system before building a large set of category/locality routes.
 
 ## 6. Architecture decision
 
@@ -145,7 +172,7 @@ The foundation is **not yet declared launch-ready**. Immediate gates are:
 7. Measure Search Console performance, guide-to-profile navigation, official outbound clicks, newsletter signup and user/business feedback.
 8. Expand only when evidence shows the initial product is useful and the operating model is repeatable.
 
-The immediate priority is to prove and finish the current foundation—not restart the repository or continue debating starter templates.
+The immediate priority is to prove and finish the current foundation while aligning the experience and locality model with the broader editorial platform vision—not restart the repository or continue debating starter templates.
 
 ## 10. Definition of progress
 
