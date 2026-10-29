@@ -1,0 +1,34 @@
+name: Production route smoke check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-route-smoke
+  cancel-in-progress: false
+
+jobs:
+  live-route-check:
+    name: Verify production routes, SEO, and internal links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check verifier syntax
+        run: node --check scripts/verify-live-routes.mjs
+
+      - name: Verify the live production site
+        env:
+          SITE_URL: https://dallascircle.com
+          CANONICAL_SITE_URL: https://dallascircle.com
+        run: node scripts/verify-live-routes.mjs
