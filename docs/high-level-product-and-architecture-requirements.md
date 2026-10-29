@@ -1,7 +1,8 @@
 # DallasCircle — High-Level Product & Internet Architecture Requirements
 
-**Status:** Proposed requirements baseline for review  
-**Vision source:** *DallasCircle.com — Vision, Business Strategy & Execution Plan*, dated 22 October 2026  
+**Status:** Active implementation requirements; subordinate to the strategic baseline  
+**Strategic baseline:** [`docs/vision-and-strategic-direction.md`](./vision-and-strategic-direction.md)  
+**Original vision source:** *DallasCircle.com — Vision, Business Strategy & Execution Plan*, dated 22 October 2026  
 **Repository:** `blockrao/dcircle`  
 **Initial positioning:** **DallasCircle — Deep Ellum for the night out**  
 **Operating model:** Remote-first, editorial-led digital product
@@ -9,6 +10,8 @@
 ---
 
 ## 1. Executive direction
+
+The strategic baseline is now explicit: DallasCircle is a custom SEO-first local-discovery product built on proven foundations. Search discoverability is paramount, but the intended advantage comes from canonical local entities, fact-level provenance, freshness controls, useful occasion-based recommendations, editorial integrity, and crawlable connected architecture—not from schema tricks, page count, or wholesale adoption of a starter repository. Keep Next.js App Router, TypeScript, Tailwind CSS, and Supabase/PostgreSQL as the current foundation. Do not lock hosting until runtime/SEO verification and security gates are addressed. Any change to this direction requires a written product and architecture rationale.
 
 DallasCircle should not launch as a generic directory that attempts to compete head-on with Google Maps, Yelp, Tripadvisor, or broad city guides on listing volume and reviews. Its initial wedge is to help people plan a real evening in Deep Ellum by combining reliable local facts into occasion-based answers: pre-show dining, late-night food, date-night options within a budget, and practical choices near a venue.
 
