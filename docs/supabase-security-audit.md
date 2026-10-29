@@ -90,13 +90,24 @@ Read-only and transaction-rollback checks confirmed:
 
 These are database-level checks using the actual `anon` role, not a full browser/API integration test. A deployed route crawl is still outstanding.
 
-## Remaining configuration issue: default privileges owned by supabase_admin
+## Supabase-managed default ACL for supabase_admin — reviewed 29 October 2026
 
-The default ACL for objects created by `supabase_admin` still grants broad privileges to `anon` and `authenticated`. The connected role is `postgres`, not a superuser, and cannot `SET ROLE supabase_admin`; direct changes to that role's default ACL are therefore not possible through this connection.
+The live `pg_default_acl` catalog confirms that the platform-managed `supabase_admin` role has broad defaults for objects it creates in `public`. This is a documented Supabase-managed default, not an ACL that the project `postgres` role can repair: Supabase's current guidance says project users cannot change this internal role's default privileges, and role membership is reserved to Supabase. Do not pursue an unsupported superuser/role-owner workaround or describe the ACL itself as fixable through the project SQL connection.
 
-**Mitigation applied and tested:** migration `20261028161824_harden_public_ddl_default_grants` changed the existing `ensure_rls` event-trigger function to `SECURITY INVOKER` and fail closed. When new public tables, views, sequences, functions, or procedures are created, the DDL creator (the object owner) now revokes `PUBLIC`, `anon`, and `authenticated` privileges; new tables also receive RLS. Reviewed migrations can then apply explicit, narrow grants. A live rollback test verified RLS and denied anonymous table, sequence, and function access. The event trigger remains enabled.
+References:
+- Supabase Knowledge Base: https://supabase.com/kb/troubleshooting/cant-change-the-default-privileges-of-supabase_admin-in-the-public-schema
+- Supabase roles and superuser limitations: https://supabase.com/docs/guides/database/postgres/roles-superuser
 
-This compensates for broad future-object defaults, but does not alter the underlying `supabase_admin` ACL. Do not claim the ACL itself is fixed. Resolve the underlying default ACL through an authorized superuser/role-owner path when available, and retain the fail-closed trigger as defense in depth.
+### Verified mitigation and current state
+
+- The `ensure_rls` DDL event trigger is enabled for `ddl_command_end`.
+- `public.rls_auto_enable()` is owned by `postgres` and runs as `SECURITY INVOKER`, not `SECURITY DEFINER`.
+- The trigger applies fail-closed hardening to new objects created in `public`: new tables get RLS enabled; tables, views, materialized views, foreign tables, sequences, functions, and procedures have privileges revoked from `PUBLIC`, `anon`, and `authenticated`. Reviewed migrations then add only explicit grants required by the product.
+- A live catalog query confirms that the `postgres`-owned defaults for public tables, sequences, and functions do not grant privileges to `anon` or `authenticated`. `service_role` retains its server-side grants.
+- A live catalog query confirms all nine canonical local-discovery tables have RLS enabled and one policy each. `anon` has no INSERT, UPDATE, or DELETE privilege on those tables; public SELECT is available on the intended published content tables. Source and relationship tables use column-level SELECT grants, so table-level `has_table_privilege(..., 'SELECT')` can be false even when approved columns are readable.
+- Earlier transaction-rollback regression tests verified that anonymous writes and internal-note reads are denied, publication integrity checks reject invalid changes, and test rows are rolled back.
+
+The underlying `supabase_admin` default ACL remains broad by platform design, but current Supabase guidance does not provide a supported project-level fix. **It is not a standalone release blocker after the trigger and actual object grants are verified.** Keep the fail-closed trigger, re-run catalog/advisor checks after database/platform changes, and explicitly review extension-created objects. Do not claim the underlying ACL has been changed, do not disable the trigger, and do not apply the staged legacy-retirement migration until application dependency and release checks are complete.
 
 ## Legacy schema still present
 
