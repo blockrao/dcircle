@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
 import { createPublicSupabaseClient } from "@/lib/supabase";
+import ExploreSearch, { type ExploreSearchItem } from "@/app/components/ExploreSearch";
 
 const SITE_URL = "https://dallascircle.com";
 const MINIMUM_ELIGIBLE_PLACES = 3;
@@ -122,6 +123,32 @@ async function getExploreData() {
 export default async function ExplorePage() {
   const data = await getExploreData();
   const canonical = `${SITE_URL}/explore`;
+  const searchItems: ExploreSearchItem[] = [
+    ...data.neighborhoods.map((item) => ({
+      id: `neighborhood:${item.id}`,
+      kind: "Neighborhood" as const,
+      title: item.name,
+      description: item.description?.trim() || `Explore source-backed place profiles in ${item.name}.`,
+      href: `/neighborhoods/${item.slug}`,
+      context: item.city,
+    })),
+    ...data.guides.map((item) => ({
+      id: `guide:${item.id}`,
+      kind: "Guide" as const,
+      title: item.title,
+      description: item.summary,
+      href: `/guides/${item.slug}`,
+      context: "Reviewed guide",
+    })),
+    ...data.places.map((item) => ({
+      id: `place:${item.id}`,
+      kind: "Place" as const,
+      title: item.name,
+      description: item.summary?.trim() || "Source-backed local place profile and official links.",
+      href: `/places/${item.slug}`,
+      context: data.neighborhoods.find((neighborhood) => neighborhood.id === item.neighborhood_id)?.name,
+    })),
+  ];
   const items = [
     ...data.neighborhoods.map((item) => ({
       "@type": "ListItem",
@@ -183,6 +210,7 @@ export default async function ExplorePage() {
           </section>
         ) : (
           <>
+            <ExploreSearch items={searchItems} />
             <section aria-labelledby="neighborhoods-heading" className="mt-14">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
