@@ -49,6 +49,9 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Verify OpenNext Worker artifact
+        run: test -f .open-next/worker.js
+
       - name: Verify required Supabase Actions secrets
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
