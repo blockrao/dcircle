@@ -2,18 +2,18 @@
 
 **DallasCircle — Deep Ellum for the night out.**
 
-DallasCircle is a remote-first, editorial-led local discovery platform for Dallas, Texas. The initial product focuses on Deep Ellum: practical guides and researched place profiles that help people plan dinner before a show, find late-night options, and plan date nights.
+DallasCircle is a remote-first, editorial-led local discovery platform for Dallas and its localities. The long-term experience will cover a broad range of local topics, with clear editorial navigation and locality-aware browsing. Deep Ellum nightlife and night-out planning are the first complete launch slice—not the permanent product boundary.
 
 The product must not imply firsthand visits or publish unsupported claims. Use reliable public sources, prefer official business and venue information, record verification dates for changing facts, and label paid placements clearly.
 
 ## Strategic baseline
 
-The product and architecture decision record is [`docs/vision-and-strategic-direction.md`](docs/vision-and-strategic-direction.md). It defines the vision, mission, intended SEO/discoverability advantage, architecture choice, repository reuse policy, release priorities, and the standing mandate for ChatGPT to act as lead internet architect and product manager. The detailed requirements and delivery documents must remain consistent with it.
+The product and architecture decision record is [`docs/vision-and-strategic-direction.md`](docs/vision-and-strategic-direction.md). UI and locality coverage principles are documented in [`docs/ui-and-locality-coverage-principles.md`](docs/ui-and-locality-coverage-principles.md). It defines the vision, mission, intended SEO/discoverability advantage, architecture choice, repository reuse policy, release priorities, and the standing mandate for ChatGPT to act as lead internet architect and product manager. The detailed requirements and delivery documents must remain consistent with it.
 
 ## Product boundaries
 
-- Start with Deep Ellum and the night-out use case.
-- Build a small, useful, source-backed product before expanding geography or categories.
+- Design the navigation and UI for broad topic coverage and locality-aware browsing from the beginning.
+- Make Deep Ellum the first complete, useful, source-backed launch area; expand other localities and topics in coverage-qualified waves.
 - Keep place facts, source provenance, editorial content, publication state, and sponsorship status distinct.
 - Do not build merchant dashboards, claims workflows, marketplace features, or broad directory coverage before demand justifies them.
 - Do not include technical consulting, software services, or agency offerings in the product.
