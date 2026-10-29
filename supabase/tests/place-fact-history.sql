@@ -90,7 +90,7 @@ BEGIN
   LIMIT 1;
 
   IF history_row.old_fact IS NOT NULL
-    OR history_row.new_fact -> 'fact_value' <> '"before"'::jsonb
+    OR history_row.new_fact -> 'fact_value' IS DISTINCT FROM '"before"'::jsonb
   THEN
     RAISE EXCEPTION 'Insert history did not preserve the initial fact value';
   END IF;
@@ -115,10 +115,10 @@ BEGIN
   ORDER BY changed_at DESC
   LIMIT 1;
 
-  IF history_row.old_fact -> 'fact_value' <> '"before"'::jsonb
-    OR history_row.new_fact -> 'fact_value' <> '"after"'::jsonb
-    OR history_row.old_fact ->> 'verification_status' <> 'unverified'
-    OR history_row.new_fact ->> 'verification_status' <> 'verified'
+  IF history_row.old_fact -> 'fact_value' IS DISTINCT FROM '"before"'::jsonb
+    OR history_row.new_fact -> 'fact_value' IS DISTINCT FROM '"after"'::jsonb
+    OR history_row.old_fact ->> 'verification_status' IS DISTINCT FROM 'unverified'
+    OR history_row.new_fact ->> 'verification_status' IS DISTINCT FROM 'verified'
   THEN
     RAISE EXCEPTION 'Update history did not preserve expected before/after values';
   END IF;
@@ -139,7 +139,7 @@ BEGIN
   ORDER BY changed_at DESC
   LIMIT 1;
 
-  IF history_row.old_fact -> 'fact_value' <> '"after"'::jsonb
+  IF history_row.old_fact -> 'fact_value' IS DISTINCT FROM '"after"'::jsonb
     OR history_row.new_fact IS NOT NULL
   THEN
     RAISE EXCEPTION 'Delete history did not preserve the last fact value';
