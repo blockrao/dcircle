@@ -10,6 +10,8 @@ export type ExploreSearchItem = {
   description: string;
   href: string;
   context?: string;
+  categories?: string[];
+  priceLevel?: number | null;
 };
 
 type Props = { items: ExploreSearchItem[] };
@@ -24,12 +26,20 @@ const filters = [
 export default function ExploreSearch({ items }: Props) {
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<(typeof filters)[number]["value"]>("all");
+  const [category, setCategory] = useState("all");
+  const [priceLevel, setPriceLevel] = useState("all");
+  const categoryOptions = useMemo(
+    () => [...new Set(items.flatMap((item) => item.kind === "Place" ? item.categories ?? [] : []))].sort((a, b) => a.localeCompare(b)),
+    [items],
+  );
   const normalizedQuery = query.trim().toLocaleLowerCase("en-US");
 
   const results = useMemo(() => {
-    if (!normalizedQuery && kind === "all") return [];
+    if (!normalizedQuery && kind === "all" && category === "all" && priceLevel === "all") return [];
     return items
       .filter((item) => kind === "all" || item.kind === kind)
+      .filter((item) => category === "all" || (item.kind === "Place" && item.categories?.includes(category)))
+      .filter((item) => priceLevel === "all" || (item.kind === "Place" && item.priceLevel === Number(priceLevel)))
       .filter((item) => {
         if (!normalizedQuery) return true;
         const searchable = [item.title, item.description, item.context, item.kind]
@@ -39,9 +49,9 @@ export default function ExploreSearch({ items }: Props) {
         return normalizedQuery.split(/\s+/).every((term) => searchable.includes(term));
       })
       .slice(0, 12);
-  }, [items, kind, normalizedQuery]);
+  }, [items, kind, category, priceLevel, normalizedQuery]);
 
-  const active = normalizedQuery.length > 0 || kind !== "all";
+  const active = normalizedQuery.length > 0 || kind !== "all" || category !== "all" || priceLevel !== "all";
 
   return (
     <section aria-labelledby="explore-search-heading" className="mt-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm md:p-7">
@@ -75,6 +85,23 @@ export default function ExploreSearch({ items }: Props) {
           ))}
         </div>
       </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <label className="block text-sm font-semibold text-slate-700">
+          <span className="mb-1 block">Place category</span>
+          <select value={category} onChange={(event) => setCategory(event.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-3 font-normal focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-200">
+            <option value="all">All categories</option>
+            {categoryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </label>
+        <label className="block text-sm font-semibold text-slate-700">
+          <span className="mb-1 block">Price level</span>
+          <select value={priceLevel} onChange={(event) => setPriceLevel(event.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-3 font-normal focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-200">
+            <option value="all">Any price level</option>
+            {[1, 2, 3, 4].map((level) => <option key={level} value={level}>{"$".repeat(level)} · Level {level}</option>)}
+          </select>
+          <span className="mt-1 block text-xs font-normal text-slate-500">Uses the profile’s recorded price level; missing values are not guessed.</span>
+        </label>
+      </div>
       {active ? (
         <div className="mt-5" aria-live="polite" aria-atomic="true">
           <p className="text-sm text-slate-600">{results.length ? `Showing ${results.length} matching ${results.length === 1 ? "result" : "results"}${results.length === 12 ? " (up to 12)" : ""}.` : "No matching published items. Try another term or choose Everything."}</p>
@@ -82,7 +109,7 @@ export default function ExploreSearch({ items }: Props) {
             <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((item) => (
                 <li key={item.id} className="rounded-xl border border-stone-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">{item.kind}{item.context ? ` · ${item.context}` : ""}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">{item.kind}{item.context ? ` · ${item.context}` : ""}{item.kind === "Place" && item.priceLevel ? ` · ${"$".repeat(item.priceLevel)}` : ""}</p>
                   <h3 className="mt-2 font-bold text-slate-900">{item.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
                   <Link href={item.href} className="mt-3 inline-flex font-semibold text-amber-800 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">Open {item.kind.toLowerCase()}</Link>
