@@ -103,11 +103,15 @@ export default async function PlacePage({ params }: PageProps) {
     : { data: [], error: null };
   if (categoriesResult.error) throw new Error("Unable to load place categories.");
 
+  if (!factsResult.data?.length || !sourcesResult.data?.length) notFound();
+
   const categories = (categoriesResult.data ?? []).map((category) => ({
     ...category,
     isPrimary: (linksResult.data ?? []).some((link) => link.category_id === category.id && link.is_primary),
   }));
   const primaryCategory = categories.find((category) => category.isPrimary);
+  if (!primaryCategory) notFound();
+
   const schemaType = primaryCategory?.slug === "restaurant"
     ? "Restaurant"
     : primaryCategory?.slug === "bar"
