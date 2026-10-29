@@ -8,7 +8,7 @@
 **Operating model:** Remote-first, editorial-led digital product  
 **Initial market:** Deep Ellum, Dallas, Texas; expansion is staged by verified coverage
 
-This document records the strategic direction that all product, engineering, SEO, content, and infrastructure decisions must support. The long-form business strategy and execution plan is maintained as a companion project artifact; this concise decision record is the repository's authoritative strategic baseline. Implementation requirements, delivery backlog, and audits must remain consistent with it.
+This document records the strategic direction that all product, engineering, SEO, content, and infrastructure decisions must support. The long-form business strategy and product definition dated 23 October 2026 is a companion source artifact; this concise decision record is the repository's authoritative strategic baseline. The [Roadmap & Discoverability Operating Plan](./roadmap-and-discoverability-operating-plan.md) translates that strategy into phase gates, measurement, and immediate execution. Implementation requirements, delivery backlog, and audits must remain consistent with these records.
 
 Related execution documents:
 - [High-level product and architecture requirements](./high-level-product-and-architecture-requirements.md)
@@ -61,6 +61,7 @@ DallasCircle's advantage must compound through a system competitors cannot repro
 1. **Canonical local entities.** Every published merchant has one stable, permanent public profile URL and canonical record. Guides, articles, locality/topic pages, collections, and ranked lists reference that same merchant entity. Stable records also cover localities, venues, guides, founders (when consented), and, later when justified, events. Relationships are explicit and facts are not copied inconsistently across pages.
 2. **Fact-level provenance.** Important claims have source records, verification method/status, checked timestamps, and review expectations. Unknown, stale, conflicting, and verified information are distinct states.
 3. **Freshness operations.** Volatile details—especially kitchen hours, menus, prices, booking links and event information—have appropriate review cadences. Old data is never presented as newly verified.
+4. **A validated recurring-use hook.** Deals and time-sensitive picks are a candidate reason for people to return, not the permanent limit of DallasCircle's identity. Test whether genuinely worthwhile, current offers drive repeat use and merchant participation; retain broader local editorial discovery as the durable platform. Do not force artificial merchant posting cadence or allow offer scarcity to hollow out the experience.
 4. **Occasion-based discovery.** Content and future retrieval answer practical needs: pre-show dining, late-night food, date nights within a defined budget, and relevant options near a venue. Each recommendation should explain why it qualifies.
 5. **Editorial integrity.** Inclusion is based on usefulness and evidence. Paid placements are disclosed and separated from editorial decisions. No fabricated reviews, firsthand claims, popularity, partnerships or unsupported local experience.
 6. **Crawlable information architecture.** Server-rendered primary content, stable URL contracts, accurate metadata, valid structured data, contextual internal links, controlled sitemap eligibility, redirect integrity and automated HTTP/SEO regression checks.
@@ -186,6 +187,12 @@ The foundation is **not yet declared launch-ready**. Immediate gates are:
 8. Expand only when evidence shows the initial product is useful and the operating model is repeatable.
 
 The immediate priority is to prove and finish the current foundation while aligning the experience, canonical merchant/founder entity model, and locality model with the broader editorial platform vision—not restart the repository or continue debating starter templates.
+
+## 9A. Strategy integration: offer-led wedge and broad local platform
+
+The strategy/product definition dated 23 October 2026 proposes deals as the primary recurring consumer hook, permanent business pages as the durable information layer, and merchants as a continuing source of relevant offers. Adopt this as a testable product hypothesis. The first release should make current offers actionable where reliable supply exists, while the underlying product remains a broader editorial-led local guide. Do not make all discovery dependent on discounts, assume every merchant can publish regularly, or choose monetization before user and merchant behavior has been observed.
+
+The roadmap is staged: (1) prove the existing application and database/security foundation; (2) complete canonical entities, provenance, freshness and publication gates; (3) deliver an integrated Deep Ellum discovery journey; (4) run a focused user/merchant pilot with pre-agreed measures; and (5) expand topics, localities, founder profiles, and commercial features only when evidence supports them. The operational details and current execution queue are in the [Roadmap & Discoverability Operating Plan](./roadmap-and-discoverability-operating-plan.md).
 
 ## 10. Definition of progress
 
