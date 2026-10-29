@@ -42,9 +42,9 @@ function getTagAttributes(tag) {
 
 function assertCanonical(html, expectedUrl) {
   const tags = html.match(/<link\b[^>]*>/gi) ?? [];
-  const canonicalTag = tags.find((tag) => getTagAttributes(tag).rel?.toLowerCase() === "canonical");
-  assert.ok(canonicalTag, `Missing canonical link for ${expectedUrl}`);
-  const href = getTagAttributes(canonicalTag).href;
+  const canonicalTags = tags.filter((tag) => getTagAttributes(tag).rel?.toLowerCase() === "canonical");
+  assert.equal(canonicalTags.length, 1, `Expected exactly one canonical link for ${expectedUrl}; found ${canonicalTags.length}`);
+  const href = getTagAttributes(canonicalTags[0]).href;
   assert.ok(href, `Canonical link has no href for ${expectedUrl}`);
   assert.equal(new URL(href, canonicalBase).href, expectedUrl, `Wrong canonical URL for ${expectedUrl}`);
 }
@@ -170,10 +170,21 @@ for (const path of ["/", "/about", "/faq", guidePath, ...placePaths]) {
 }
 
 const crawledHtml = new Map();
+const seenTitles = new Map();
+const seenDescriptions = new Map();
 for (const sitemapUrl of sitemapUrls) {
   const html = await getPage(sitemapUrl.pathname);
   assertCanonical(html, canonicalUrl(sitemapUrl.pathname));
-  assertPageMetadata(html, sitemapUrl.pathname);
+  const metadata = getPageMetadata(html, sitemapUrl.pathname);
+
+  const previousTitlePath = seenTitles.get(metadata.title);
+  assert.ok(!previousTitlePath, `Duplicate page title on ${sitemapUrl.pathname} and ${previousTitlePath}`);
+  seenTitles.set(metadata.title, sitemapUrl.pathname);
+
+  const previousDescriptionPath = seenDescriptions.get(metadata.description);
+  assert.ok(!previousDescriptionPath, `Duplicate meta description on ${sitemapUrl.pathname} and ${previousDescriptionPath}`);
+  seenDescriptions.set(metadata.description, sitemapUrl.pathname);
+
   crawledHtml.set(sitemapUrl.pathname, html);
 }
 
