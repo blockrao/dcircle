@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 
@@ -25,16 +26,22 @@ async function getPublishedGuide(slug: string) {
   if (!data) return null;
 
   // A reviewed timestamp alone does not make a useful guide. Require at least
-  // one visible source and one currently published place relationship.
+  // one visible source and one linked place that passes the shared place gate.
   const [sourcesResult, linksResult] = await Promise.all([
     supabase.from("guide_sources").select("id").eq("guide_id", data.id).limit(1),
-    supabase.from("guide_places").select("place_id").eq("guide_id", data.id).limit(1),
+    supabase.from("guide_places").select("place_id").eq("guide_id", data.id),
   ]);
 
   if (sourcesResult.error || linksResult.error) {
     throw new Error("Unable to verify the publication requirements for this guide.");
   }
-  return sourcesResult.data?.length && linksResult.data?.length ? data : null;
+  if (!sourcesResult.data?.length || !linksResult.data?.length) return null;
+
+  const linkedPlaceIds = [...new Set(linksResult.data.map((link) => link.place_id))];
+  const eligiblePlaceIds = await getEligiblePlaceIds(supabase, linkedPlaceIds);
+  if (eligiblePlaceIds.size === 0) return null;
+
+  return { ...data, eligiblePlaceIds: [...eligiblePlaceIds] };
 }
 
 function displayDate(value: string) {
@@ -77,6 +84,7 @@ export default async function GuidePage({ params }: PageProps) {
       .from("guide_places")
       .select("place_id,position,editorial_rationale,is_sponsored,sponsorship_disclosure")
       .eq("guide_id", guide.id)
+      .in("place_id", guide.eligiblePlaceIds)
       .order("position", { ascending: true }),
     supabase
       .from("guide_sources")
@@ -91,7 +99,7 @@ export default async function GuidePage({ params }: PageProps) {
     ? await supabase
         .from("places")
         .select("id,slug,name,summary,address_line1,city,region,postal_code,website_url")
-        .in("id", placeIds)
+        .in("id", guide.eligiblePlaceIds)
         .eq("publication_status", "published")
     : { data: [], error: null };
   if (placesResult.error) throw new Error("Unable to load guide places.");
