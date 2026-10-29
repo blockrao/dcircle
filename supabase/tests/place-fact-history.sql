@@ -7,6 +7,7 @@ BEGIN;
 DO $test$
 DECLARE
   test_suffix text := replace(gen_random_uuid()::text, '-', '');
+  test_category_id uuid;
   test_place_id uuid;
   test_source_id uuid;
   test_fact_id uuid;
@@ -43,9 +44,21 @@ BEGIN
     RAISE EXCEPTION 'API roles must not be able to execute the history trigger function directly';
   END IF;
 
-  INSERT INTO public.places (slug, name, category, city, region, publication_status)
-  VALUES ('fact-history-test-' || test_suffix, 'Fact history test place', 'other', 'Dallas', 'TX', 'draft')
+  SELECT id INTO test_category_id
+  FROM public.categories
+  WHERE slug = 'other' AND is_active
+  LIMIT 1;
+
+  IF test_category_id IS NULL THEN
+    RAISE EXCEPTION 'Required active category fixture is missing';
+  END IF;
+
+  INSERT INTO public.places (slug, name, city, region, publication_status)
+  VALUES ('fact-history-test-' || test_suffix, 'Fact history test place', 'Dallas', 'TX', 'draft')
   RETURNING id INTO test_place_id;
+
+  INSERT INTO public.place_categories (place_id, category_id, is_primary)
+  VALUES (test_place_id, test_category_id, true);
 
   INSERT INTO public.place_sources (place_id, source_url, source_type, publisher_name)
   VALUES (
