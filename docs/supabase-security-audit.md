@@ -143,3 +143,18 @@ Supabase announced that new tables in the public schema will no longer be expose
 - Follow-up hardening: category SELECT policy is deliberately non-recursive (`is_active` only); place-category visibility still requires the associated place and neighborhood to be published. This avoids cyclic RLS policy evaluation between the two tables.
 
 - Added covering indexes for the composite `place_facts(source_id, place_id)` foreign key and `places.neighborhood_id` after the Supabase performance advisor identified the missing coverage. The advisor still reports unused indexes on empty legacy/new tables; do not prune those until the legacy schema retirement and real query patterns are known.
+
+
+## Publication integrity hardening — 29 October 2026
+
+Applied live migration `20261029014857_require_reviewed_guides_and_preserve_publication_integrity` and committed the matching migration file.
+
+- Public guide reads and their related source/place rows now require `publication_status = 'published'`, a non-null `published_at`, and a non-null `reviewed_at`.
+- Trigger checks prevent a published guide from losing its final source or final place relationship. They also reject a published guide if a linked place is no longer published.
+- A place cannot be unpublished while a currently published/reviewed guide still depends on it; unpublish or revise the guide first.
+- A published place cannot lose its last current verified fact through an insert/update/delete operation. Runtime page and sitemap checks also reject places with no current fact, no visible source, or no active primary category.
+- The shared application helper `lib/publication-eligibility.ts` is used by place routes, guide routes, and the sitemap to keep indexability decisions aligned.
+- Rollback-only regression checks were executed against the live project. Publication without source evidence was rejected; deleting the last current fact/source/place relationship and unpublishing a place still used by a published guide were rejected. All test records were rolled back and a follow-up query confirmed zero test records remained.
+- Verified via catalog privilege checks that anonymous users cannot insert/update/delete place records and cannot select `internal_notes` from place sources, place facts, or guide sources. The four new trigger helper functions are not executable by `anon`.
+
+This does not resolve the separate underlying `supabase_admin` default-ACL issue, and it does not authorize applying the staged legacy-table retirement migration.
