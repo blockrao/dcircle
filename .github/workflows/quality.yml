@@ -34,6 +34,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Check route-verifier syntax
+        run: node --check scripts/verify-live-routes.mjs
+
       - name: Lint
         run: npm run lint
 
