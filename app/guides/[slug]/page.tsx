@@ -5,8 +5,6 @@ import { connection } from "next/server";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
-
-
 type PageProps = { params: Promise<{ slug: string }> };
 
 async function getPublishedGuide(slug: string) {
