@@ -43,8 +43,8 @@ BEGIN
     RAISE EXCEPTION 'API roles must not be able to execute the history trigger function directly';
   END IF;
 
-  INSERT INTO public.places (slug, name, city, region, publication_status)
-  VALUES ('fact-history-test-' || test_suffix, 'Fact history test place', 'Dallas', 'TX', 'draft')
+  INSERT INTO public.places (slug, name, category, city, region, publication_status)
+  VALUES ('fact-history-test-' || test_suffix, 'Fact history test place', 'other', 'Dallas', 'TX', 'draft')
   RETURNING id INTO test_place_id;
 
   INSERT INTO public.place_sources (place_id, source_url, source_type, publisher_name)
