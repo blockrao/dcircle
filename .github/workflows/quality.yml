@@ -37,6 +37,9 @@ jobs:
       - name: Check route-verifier syntax
         run: node --check scripts/verify-live-routes.mjs
 
+      - name: Check publication-audit syntax
+        run: node --check scripts/audit-publication-integrity.mjs
+
       - name: Lint
         run: npm run lint
 
@@ -52,6 +55,12 @@ jobs:
             echo "::error::Configure repository Actions secrets NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before route verification can run."
             exit 1
           fi
+
+      - name: Audit public publication integrity (read-only)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npm run audit:publication
 
       - name: Start production server and verify routes, SEO, and internal links
         env:
