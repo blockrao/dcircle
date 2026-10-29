@@ -179,7 +179,7 @@ export default async function ExplorePage() {
         {data.loadError ? (
           <section className="mt-12 rounded-2xl border border-amber-300 bg-amber-50 p-6" role="status">
             <h2 className="text-lg font-bold">Current inventory is temporarily unavailable</h2>
-            <p className="mt-2 leading-7 text-slate-700">We couldn't load the latest published inventory. Please try again shortly; we won't substitute unverified listings.</p>
+            <p className="mt-2 leading-7 text-slate-700">We couldn’t load the latest published inventory. Please try again shortly; we won’t substitute unverified listings.</p>
           </section>
         ) : (
           <>
