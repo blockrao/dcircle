@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "dcircle",
+  "name": "seo-technical-foundation-dcircle",
   "main": ".open-next/worker.js",
   "upload_source_maps": true,
   "compatibility_date": "2026-10-29",
