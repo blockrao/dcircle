@@ -85,7 +85,7 @@ export default async function NeighborhoodPage({ params }: PageProps) {
         "@type": "ListItem",
         position: index + 1,
         item: {
-          "@type": "Place",
+          "@type": "LocalBusiness",
           "@id": `${SITE_URL}/places/${place.slug}`,
           url: `${SITE_URL}/places/${place.slug}`,
           name: place.name,
