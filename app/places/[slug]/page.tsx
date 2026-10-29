@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import type { Json } from "@/lib/local-discovery-database.types";
+import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 
@@ -24,45 +25,8 @@ async function getPublishedPlace(slug: string) {
   if (error) throw new Error(`Unable to load place: ${error.message}`);
   if (!data) return null;
 
-  // A published status alone is not enough for indexability: require current
-  // verified evidence, a source visible under its RLS policy, and an active
-  // primary category. Keep these rules aligned with sitemap eligibility.
-  const now = new Date().toISOString();
-  const [factsResult, sourcesResult, primaryLinkResult] = await Promise.all([
-    supabase
-      .from("place_facts")
-      .select("id")
-      .eq("place_id", data.id)
-      .eq("verification_status", "verified")
-      .or(`review_due_at.is.null,review_due_at.gte.${now}`)
-      .limit(1),
-    supabase
-      .from("place_sources")
-      .select("id")
-      .eq("place_id", data.id)
-      .limit(1),
-    supabase
-      .from("place_categories")
-      .select("category_id")
-      .eq("place_id", data.id)
-      .eq("is_primary", true)
-      .limit(1),
-  ]);
-
-  if (factsResult.error || sourcesResult.error || primaryLinkResult.error) {
-    throw new Error("Unable to verify the publication requirements for this place.");
-  }
-  const primaryLink = primaryLinkResult.data?.[0];
-  if (!factsResult.data?.length || !sourcesResult.data?.length || !primaryLink) return null;
-
-  const categoryResult = await supabase
-    .from("categories")
-    .select("id")
-    .eq("id", primaryLink.category_id)
-    .eq("is_active", true)
-    .maybeSingle();
-  if (categoryResult.error) throw new Error("Unable to verify the primary place category.");
-  return categoryResult.data ? data : null;
+  const eligiblePlaceIds = await getEligiblePlaceIds(supabase, [data.id]);
+  return eligiblePlaceIds.has(data.id) ? data : null;
 }
 
 function formatFactValue(value: Json): string {
