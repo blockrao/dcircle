@@ -2,6 +2,7 @@
 
 **Status:** Active implementation requirements; subordinate to the strategic baseline  
 **Strategic baseline:** [`docs/vision-and-strategic-direction.md`](./vision-and-strategic-direction.md)  
+**Mandatory pre-execution review:** [`docs/architecture-and-product-review-gate.md`](./architecture-and-product-review-gate.md)  
 **Execution sequence:** [`docs/roadmap-and-discoverability-operating-plan.md`](./roadmap-and-discoverability-operating-plan.md)  
 **Original vision source:** *DallasCircle.com — Vision, Business Strategy & Execution Plan*, dated 22 October 2026  
 **Repository:** `blockrao/dcircle`  
@@ -79,7 +80,7 @@ Founder profiles are a distinct, optional canonical Person entity. Publish only 
 
 The advantage is not a particular framework, a schema markup trick, or an AI-generated page count. It comes from compounding data quality and decision usefulness.
 
-### 4.1 Source-backed fact ledger
+### 6.1 Source-backed fact ledger
 
 Store critical facts as facts with provenance, not merely fields with values. Each fact should be traceable to a source URL or source record, source type, checked timestamp, verification method, confidence/status, and next review date where relevant. The system must distinguish “not known” from “false” and “not checked recently” from “verified.”
 
@@ -91,7 +92,7 @@ Examples:
 - Menu or booking URL.
 - Event date and event venue.
 
-### 4.2 Occasion and constraint model
+### 6.2 Occasion and constraint model
 
 Support structured attributes that answer user intent, such as:
 - occasion: pre-show, post-show, date night, group dinner;
@@ -102,15 +103,15 @@ Support structured attributes that answer user intent, such as:
 
 Do not infer suitability from vibes or unsupported copy. Each recommendation should explain why it fits the request using facts and editorial judgment that can be defended.
 
-### 4.3 Canonical local entity graph
+### 6.3 Canonical local entity graph
 
 Model places, venues, events (later), guides, neighborhoods, and sources as linked entities. A guide should reference canonical business IDs; business pages should link to relevant guides and nearby venues; venue pages can eventually link to practical dining options. Avoid duplicate business records and inconsistent spellings across content.
 
-### 4.4 Freshness and correction workflow
+### 6.4 Freshness and correction workflow
 
 Make stale facts visible to operators. Provide a lightweight correction path for businesses and readers. Log corrections, source changes, timestamps, and review outcomes. Time-sensitive fields need shorter review intervals than stable facts. Do not silently display old hours as current facts indefinitely.
 
-### 4.5 Editorial utility
+### 6.5 Editorial utility
 
 Create content that solves a decision: “where to eat before a show at [venue],” not generic “best restaurants in Dallas” filler. Each guide needs a clear purpose, meaningful selection criteria, useful comparisons, source attribution, last-checked context for volatile facts, and official next-step links.
 
