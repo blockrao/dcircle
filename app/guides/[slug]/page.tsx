@@ -115,6 +115,17 @@ export default async function GuidePage({ params }: PageProps) {
     dateModified: guide.reviewed_at,
     author: { "@type": "Organization", name: guide.author_name },
     publisher: { "@type": "Organization", name: "DallasCircle", url: "https://dallascircle.com" },
+    // Connect this editorial document to the same canonical place entities
+    // used by the visible links below; never create guide-specific place copies.
+    about: linksResult.data
+      .map((link) => placesById.get(link.place_id))
+      .filter((place): place is NonNullable<typeof place> => Boolean(place))
+      .map((place) => ({
+        "@type": "Place",
+        "@id": `https://dallascircle.com/places/${place.slug}`,
+        url: `https://dallascircle.com/places/${place.slug}`,
+        name: place.name,
+      })),
   };
 
   return (
