@@ -106,9 +106,3 @@ jobs:
           fi
 
           SITE_URL=http://localhost:3000 CANONICAL_SITE_URL=https://dallascircle.com npm run check:live
-
-      - name: Build Cloudflare Worker bundle
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        run: npm run cf:build
