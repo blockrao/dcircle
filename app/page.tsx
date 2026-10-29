@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { connection } from "next/server";
+import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
+import { createPublicSupabaseClient } from "@/lib/supabase";
 
 export const metadata = {
   title: "Deep Ellum for the Night Out",
@@ -28,7 +31,32 @@ const guideIdeas = [
   },
 ];
 
-export default function HomePage() {
+async function getFeaturedPlaces() {
+  await connection();
+  const supabase = createPublicSupabaseClient();
+  const { data, error } = await supabase
+    .from("places")
+    .select("id,slug,name,summary")
+    .eq("publication_status", "published")
+    .not("published_at", "is", null)
+    .order("name", { ascending: true })
+    .limit(12);
+
+  // Discovery is additive: a temporary read/evidence failure should not take
+  // down the core homepage. Fail closed by omitting the section.
+  if (error || !data?.length) return [];
+
+  try {
+    const eligibleIds = await getEligiblePlaceIds(supabase, data.map((place) => place.id));
+    return data.filter((place) => eligibleIds.has(place.id)).slice(0, 6);
+  } catch {
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const featuredPlaces = await getFeaturedPlaces();
+
   return (
     <main className="min-h-screen bg-stone-50 text-slate-900">
       <section className="relative overflow-hidden bg-slate-950 px-6 py-24 text-white md:py-32">
@@ -86,6 +114,29 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {featuredPlaces.length > 0 ? (
+        <section aria-labelledby="featured-places-heading" className="border-y border-stone-200 bg-white px-6 py-20 md:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div className="max-w-2xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">Explore Deep Ellum</p>
+                <h2 id="featured-places-heading" className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">Places with details you can check.</h2>
+                <p className="mt-4 text-lg leading-7 text-slate-600">Browse published profiles that meet our current evidence and source standards. Each profile links to its own verified details and references.</p>
+              </div>
+            </div>
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredPlaces.map((place) => (
+                <article key={place.id} className="flex h-full flex-col rounded-2xl border border-stone-200 bg-stone-50 p-6">
+                  <h3 className="text-xl font-bold">{place.name}</h3>
+                  {place.summary ? <p className="mt-3 flex-1 leading-7 text-slate-600">{place.summary}</p> : <p className="mt-3 flex-1 leading-7 text-slate-600">See the profile for source-backed details and official links.</p>}
+                  <Link href={`/places/${place.slug}`} className="mt-5 inline-flex font-semibold text-amber-800 underline underline-offset-4">View place profile</Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section id="our-approach" className="border-y border-stone-200 bg-white px-6 py-20 md:py-24">
         <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
