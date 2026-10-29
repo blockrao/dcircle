@@ -75,7 +75,7 @@ function assertSchemaType(html, label, expectedTypes) {
   );
 }
 
-function assertPageMetadata(html, label) {
+function getPageMetadata(html, label) {
   const title = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
   assert.ok(title, `Missing document title on ${label}`);
   const metaTags = html.match(/<meta\b[^>]*>/gi) ?? [];
@@ -89,6 +89,11 @@ function assertPageMetadata(html, label) {
     .map((attributes) => attributes.content ?? "")
     .join(" ");
   assert.ok(!/\bnoindex\b/i.test(robots), `Sitemap URL ${label} must not be marked noindex`);
+  return { title, description };
+}
+
+function assertPageMetadata(html, label) {
+  getPageMetadata(html, label);
 }
 
 function parseSitemap(xml) {
