@@ -158,6 +158,7 @@ function getLocalLinkPaths(html) {
 }
 
 const guidePath = "/guides/three-deep-ellum-dinner-stops";
+const explorePath = "/explore";
 const neighborhoodPath = "/neighborhoods/deep-ellum";
 const placePaths = [
   "/places/serious-pizza-deep-ellum",
@@ -170,7 +171,19 @@ assertCanonical(homepage, canonicalUrl("/"));
 assertPageMetadata(homepage, "/");
 assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
 assert.ok(homepage.includes(neighborhoodPath), "Homepage should link to the eligible Deep Ellum neighborhood page.");
+assert.ok(homepage.includes(explorePath), "Homepage should link to the editorial explore hub.");
 assert.ok(!homepage.toLowerCase().includes("php rescue"), "Homepage must not promote retired PHP services.");
+
+const explore = await getPage(explorePath);
+assertCanonical(explore, canonicalUrl(explorePath));
+assertPageMetadata(explore, explorePath);
+assertSchemaType(explore, explorePath, ["CollectionPage"]);
+assertCanonicalEntityIds(explore, explorePath);
+assert.ok(explore.includes(neighborhoodPath), "Explore hub should link to the eligible neighborhood page.");
+assert.ok(explore.includes(guidePath), "Explore hub should link to the reviewed guide.");
+for (const path of placePaths) {
+  assert.ok(explore.includes(path), `Explore hub should link to eligible canonical profile ${path}`);
+}
 
 const neighborhood = await getPage(neighborhoodPath);
 assertCanonical(neighborhood, canonicalUrl(neighborhoodPath));
@@ -206,7 +219,7 @@ assert.ok(robots.includes(canonicalUrl("/sitemap.xml")), "robots.txt should refe
 const sitemapXml = await getPage("/sitemap.xml");
 const sitemapUrls = parseSitemap(sitemapXml);
 const sitemapPaths = new Set(sitemapUrls.map((url) => url.pathname));
-for (const path of ["/", "/about", "/faq", guidePath, neighborhoodPath, ...placePaths]) {
+for (const path of ["/", "/about", "/faq", explorePath, guidePath, neighborhoodPath, ...placePaths]) {
   assert.ok(sitemapPaths.has(path), `Sitemap should include required published route ${path}`);
 }
 
