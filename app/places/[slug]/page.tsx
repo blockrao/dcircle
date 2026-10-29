@@ -6,8 +6,6 @@ import type { Json } from "@/lib/local-discovery-database.types";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
-
-
 type PageProps = { params: Promise<{ slug: string }> };
 
 async function getPublishedPlace(slug: string) {
