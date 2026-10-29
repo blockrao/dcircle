@@ -158,6 +158,7 @@ function getLocalLinkPaths(html) {
 }
 
 const guidePath = "/guides/three-deep-ellum-dinner-stops";
+const neighborhoodPath = "/neighborhoods/deep-ellum";
 const placePaths = [
   "/places/serious-pizza-deep-ellum",
   "/places/pecan-lodge-deep-ellum",
@@ -169,6 +170,15 @@ assertCanonical(homepage, canonicalUrl("/"));
 assertPageMetadata(homepage, "/");
 assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
 assert.ok(!homepage.toLowerCase().includes("php rescue"), "Homepage must not promote retired PHP services.");
+
+const neighborhood = await getPage(neighborhoodPath);
+assertCanonical(neighborhood, canonicalUrl(neighborhoodPath));
+assertPageMetadata(neighborhood, neighborhoodPath);
+assertSchemaType(neighborhood, neighborhoodPath, ["CollectionPage"]);
+assertCanonicalEntityIds(neighborhood, neighborhoodPath);
+for (const path of placePaths) {
+  assert.ok(neighborhood.includes(path), `${neighborhoodPath} should link to eligible canonical profile ${path}`);
+}
 
 const guide = await getPage(guidePath);
 assertCanonical(guide, canonicalUrl(guidePath));
@@ -195,7 +205,7 @@ assert.ok(robots.includes(canonicalUrl("/sitemap.xml")), "robots.txt should refe
 const sitemapXml = await getPage("/sitemap.xml");
 const sitemapUrls = parseSitemap(sitemapXml);
 const sitemapPaths = new Set(sitemapUrls.map((url) => url.pathname));
-for (const path of ["/", "/about", "/faq", guidePath, ...placePaths]) {
+for (const path of ["/", "/about", "/faq", guidePath, neighborhoodPath, ...placePaths]) {
   assert.ok(sitemapPaths.has(path), `Sitemap should include required published route ${path}`);
 }
 
