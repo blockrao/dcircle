@@ -54,8 +54,40 @@ async function getFeaturedPlaces() {
   }
 }
 
+async function getFeaturedNeighborhood() {
+  await connection();
+  const supabase = createPublicSupabaseClient();
+  const { data: neighborhood, error: neighborhoodError } = await supabase
+    .from("neighborhoods")
+    .select("id,slug,name,description")
+    .eq("slug", "deep-ellum")
+    .eq("publication_status", "published")
+    .maybeSingle();
+
+  if (neighborhoodError || !neighborhood) return null;
+
+  const { data: places, error: placesError } = await supabase
+    .from("places")
+    .select("id")
+    .eq("neighborhood_id", neighborhood.id)
+    .eq("publication_status", "published")
+    .not("published_at", "is", null);
+
+  if (placesError || !places?.length) return null;
+
+  try {
+    const eligibleIds = await getEligiblePlaceIds(supabase, places.map((place) => place.id));
+    return eligibleIds.size >= 3 ? neighborhood : null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function HomePage() {
-  const featuredPlaces = await getFeaturedPlaces();
+  const [featuredPlaces, featuredNeighborhood] = await Promise.all([
+    getFeaturedPlaces(),
+    getFeaturedNeighborhood(),
+  ]);
 
   return (
     <main className="min-h-screen bg-stone-50 text-slate-900">
@@ -86,6 +118,19 @@ export default async function HomePage() {
           </p>
         </div>
       </section>
+
+      {featuredNeighborhood ? (
+        <section aria-labelledby="neighborhood-discovery-heading" className="border-b border-stone-200 bg-amber-50 px-6 py-10">
+          <div className="mx-auto flex max-w-6xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-800">Explore the neighborhood</p>
+              <h2 id="neighborhood-discovery-heading" className="mt-2 text-2xl font-bold text-slate-900">{featuredNeighborhood.name}, Dallas</h2>
+              <p className="mt-2 max-w-2xl leading-7 text-slate-700">{featuredNeighborhood.description?.trim() || "Browse local place profiles that meet our evidence and publication checks."}</p>
+            </div>
+            <Link href={"/neighborhoods/" + featuredNeighborhood.slug} className="inline-flex shrink-0 items-center justify-center rounded-lg bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">Explore neighborhood</Link>
+          </div>
+        </section>
+      ) : null}
 
       <section id="planning-guides" className="px-6 py-20 md:py-24">
         <div className="mx-auto max-w-6xl">

@@ -169,6 +169,7 @@ const homepage = await getPage("/");
 assertCanonical(homepage, canonicalUrl("/"));
 assertPageMetadata(homepage, "/");
 assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
+assert.ok(homepage.includes(neighborhoodPath), "Homepage should link to the eligible Deep Ellum neighborhood page.");
 assert.ok(!homepage.toLowerCase().includes("php rescue"), "Homepage must not promote retired PHP services.");
 
 const neighborhood = await getPage(neighborhoodPath);
