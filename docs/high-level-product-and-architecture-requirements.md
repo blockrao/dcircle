@@ -62,6 +62,14 @@ Jobs:
 
 A remote researcher/editor who needs to create trustworthy pages efficiently, record sources, revisit stale facts, correct errors, publish guides, and measure audience and merchant response.
 
+## 4. Canonical merchant and founder profiles
+
+Every eligible published merchant must have one stable, permanent canonical profile URL backed by one canonical entity record. All guides, articles, locality/topic pages, collections, and ranked lists must reference that same merchant identity and URL. Merchant categories and locality memberships are structured relationships used for browsing and filters; filter variants must not create duplicate merchant profiles. Stable entity IDs, source-backed facts, freshness, corrections, publication state, and structured data must be generated from the same canonical source. Slug changes require permanent redirects and consistent internal links, canonicals, and sitemap updates.
+
+Use the most specific truthful Schema.org LocalBusiness subtype and a stable entity `@id`, with JSON-LD matching visible, verified page content. Follow [Google's Local Business structured data guidance](https://developers.google.com/search/docs/appearance/structured-data/local-business) and canonicalization guidance. Do not invent ratings, reviews, founder claims, hours, prices, coordinates, or other unsupported fields.
+
+Founder profiles are a distinct, optional canonical Person entity. Publish only with explicit opt-in from the founder or an authorized representative, verified identity and founder/co-founder relationship, recorded consent for biography/photo use, and a meaningful editorial profile. Founder, current owner, promoter, CEO, and operator are distinct roles. Link a founder to one or more merchant entities with explicit relationship roles and evidence. Participation does not buy favorable coverage or inclusion. Full rules and acceptance criteria: `docs/canonical-merchant-and-founder-architecture.md`.
+
 ## 4. Differentiation: where the technical advantage comes from
 
 The advantage is not a particular framework, a schema markup trick, or an AI-generated page count. It comes from compounding data quality and decision usefulness.
