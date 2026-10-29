@@ -1,11 +1,13 @@
 # DallasCircle — Prioritized Delivery Backlog
 
-**Baseline:** Vision & Business Strategy dated 22 October 2026; High-Level Product & Architecture Requirements.  
+**Baseline:** Strategy & Product Definition dated 23 October 2026; authoritative strategic baseline in `docs/vision-and-strategic-direction.md`; execution sequence in `docs/roadmap-and-discoverability-operating-plan.md`.  
 **Working branch:** `seo/technical-foundation`  
 **Product boundary:** DallasCircle is an editorial-led local discovery platform for Dallas localities and a broad range of local topics. Deep Ellum is the first complete launch area, not the permanent geographic boundary. No technical consulting, software modernization, or agency services belong in the product.  
 **Delivery principle:** one small, verifiable vertical slice at a time. Do not merge or deploy until build, route, security, and SEO checks have been run.
 
 ## P0 — Foundation gates
+
+**Execution order:** close current local verification and Supabase permission release blockers first; then complete the canonical entity/publication contracts and first integrated discovery journey. Do not deploy or merge merely because the build passes. See the [Roadmap & Discoverability Operating Plan](./roadmap-and-discoverability-operating-plan.md) for phase exit criteria, measurement, and decision discipline.
 
 - [ ] **DC-00A — Canonical merchant profile contract.** Define the permanent merchant URL, stable entity ID/`@id`, source-backed fact model, categories/locality relationships, profile completeness/publication gate, redirects on slug changes, JSON-LD contract, and shared linking contract for all articles/guides/collections. Every eligible published merchant must have one canonical profile; no duplicate profile variants.
 - [ ] **DC-00B — Optional founder profile and consent workflow.** Model founders as separate Person entities with explicit verified founder/co-founder relationships to merchant entities. Publish only when the person or authorized representative opts in, identity/role and supplied claims are verified, consent for bio/photo use is recorded, and editorial publication criteria are met. Keep founder, owner, promoter, CEO, and operator roles distinct.
@@ -19,6 +21,7 @@
 - [ ] **DC-05 — Publication/indexing quality gate.** Draft/published/hidden/closed states; sitemap includes only published canonical pages that meet completeness rules. Rendering, metadata, structured data, internal links, and sitemap must share the same canonical source of truth.
 - [ ] **DC-06 — Technical SEO verification.** Added `npm run check:live` (`scripts/verify-live-routes.mjs`) to check route status, canonical tags, JSON-LD, correction/source context, sitemap inclusion, and the retired-path redirect. Run it against the deployed preview after deployment; add broader internal-link and robots checks as needed.
 - [ ] **DC-07 — Trust, newsletter, and learning loop.** Publish sourcing/correction/sponsorship policy; implement a working newsletter signup only with appropriate consent and reliable handling; track useful actions, business corrections/responses, research effort, and sponsorship interest.
+- [ ] **DC-07A — Offer lifecycle and pilot measurement contract.** Before a deal-led pilot, define offer states (draft, review, scheduled, active, expired, withdrawn, archived), source/merchant authority, validity window, eligibility and redemption terms, quality review, expired-feed exclusion, and measurable next actions. Set pilot success/stop/change thresholds before interpreting results; do not force artificial merchant posting cadence.
 
 ## P1 — After the first complete vertical slice
 
