@@ -7,6 +7,8 @@
 
 ## P0 — Foundation gates
 
+**Mandatory pre-execution rule:** before any material backlog item is implemented, apply [`docs/architecture-and-product-review-gate.md`](./architecture-and-product-review-gate.md). Record the decision, acceptance criteria, risks, verification plan, and approval boundary in the PR or relevant decision record. A task is not complete merely because code was written or a build passed.
+
 **Execution order:** close current local verification and Supabase permission release blockers first; then complete the canonical entity/publication contracts and first integrated discovery journey. Do not deploy or merge merely because the build passes. See the [Roadmap & Discoverability Operating Plan](./roadmap-and-discoverability-operating-plan.md) for phase exit criteria, measurement, and decision discipline.
 
 - [ ] **DC-00A — Canonical merchant profile contract.** Define the permanent merchant URL, stable entity ID/`@id`, source-backed fact model, categories/locality relationships, profile completeness/publication gate, redirects on slug changes, JSON-LD contract, and shared linking contract for all articles/guides/collections. Every eligible published merchant must have one canonical profile; no duplicate profile variants.
@@ -47,6 +49,9 @@
 6. **Gate F — Learning:** complete DC-07; collect audience and business evidence before investing in P1/P2.
 
 ## Definition of done
+
+- The mandatory architecture/product review gate was applied before material implementation.
+- Discoverability, user value, data integrity, security, operational risk, and rollback were considered before execution.
 
 - Acceptance criteria exist before implementation.
 - Change is made on a feature branch and linked to a PR.
