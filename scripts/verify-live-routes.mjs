@@ -199,6 +199,16 @@ assertCanonical(guide, canonicalUrl(guidePath));
 assertPageMetadata(guide, guidePath);
 assertSchemaType(guide, guidePath, ["Article"]);
 assertCanonicalEntityIds(guide, guidePath);
+const guideSchemas = getJsonLd(guide, guidePath);
+const guidePlaceEntityIds = guideSchemas.flatMap((block) =>
+  Array.isArray(block.about) ? block.about.map((entity) => entity && typeof entity === "object" ? entity["@id"] : undefined) : [],
+).filter((value) => typeof value === "string");
+for (const path of placePaths) {
+  assert.ok(
+    guidePlaceEntityIds.includes(canonicalUrl(path)),
+    `Guide JSON-LD should reference canonical place entity ${canonicalUrl(path)}`,
+  );
+}
 
 for (const path of placePaths) {
   const html = await getPage(path);
