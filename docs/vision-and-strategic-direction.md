@@ -11,6 +11,7 @@
 This document records the strategic direction that all product, engineering, SEO, content, and infrastructure decisions must support. The long-form business strategy and product definition dated 23 October 2026 is a companion source artifact; this concise decision record is the repository's authoritative strategic baseline. The [Roadmap & Discoverability Operating Plan](./roadmap-and-discoverability-operating-plan.md) translates that strategy into phase gates, measurement, and immediate execution. Implementation requirements, delivery backlog, and audits must remain consistent with these records.
 
 Related execution documents:
+- [Mandatory architecture and product review gate](./architecture-and-product-review-gate.md)
 - [High-level product and architecture requirements](./high-level-product-and-architecture-requirements.md)
 - [Prioritized delivery backlog](./prioritized-delivery-backlog.md)
 - [SEO foundation audit](./seo-foundation-audit.md)
@@ -31,8 +32,13 @@ Related execution documents:
 - Keep canonical data, fact-level provenance, freshness, publication eligibility, internal linking, structured data, and sitemap generation consistent across the system.
 - Review security, privacy, maintainability, reliability, performance, accessibility, operating cost, and migration risk alongside SEO. Do not sacrifice user trust or system integrity for short-term traffic tactics.
 - Make recommendations and proceed with safe, reversible work without asking the user to re-approve the strategic direction each time. Ask for input when a decision requires a personal/business commitment, a material cost, an irreversible change, access or credentials, or a genuine product trade-off.
+- **Review every material step before execution.** Apply `docs/architecture-and-product-review-gate.md` as a mandatory pre-execution gate for product, content, code, SEO, data, security, infrastructure, migration, and release decisions. Assess discoverability and user value before choosing an implementation; define acceptance criteria, verification, risks, and rollback before acting.
 - Maintain a clear decision log, explicit acceptance criteria, measurable completion states, and honest reporting of what has and has not been implemented or verified.
 - Prefer a focused execution path over repeated architecture debates. Avoid unnecessary rewrites, new services, repositories, databases, and dependencies unless evidence demonstrates a material benefit.
+
+### Mandatory pre-execution gate
+
+No material implementation step should begin until the lead internet architect/product manager has reviewed its purpose, strategic fit, discoverability impact, evidence, architecture/data integrity, security/privacy, operational risk, alternatives, acceptance criteria, verification plan, and approval boundary. Small safe tasks can use a concise review; material decisions must record the rationale in the PR or appropriate project document. Destructive changes, production cutovers, material spend, credential/access changes, and other high-risk actions require explicit user approval where appropriate. See the [Mandatory Architecture & Product Review Gate](./architecture-and-product-review-gate.md).
 
 ### Decision and quality standard
 
@@ -62,10 +68,10 @@ DallasCircle's advantage must compound through a system competitors cannot repro
 2. **Fact-level provenance.** Important claims have source records, verification method/status, checked timestamps, and review expectations. Unknown, stale, conflicting, and verified information are distinct states.
 3. **Freshness operations.** Volatile details—especially kitchen hours, menus, prices, booking links and event information—have appropriate review cadences. Old data is never presented as newly verified.
 4. **A validated recurring-use hook.** Deals and time-sensitive picks are a candidate reason for people to return, not the permanent limit of DallasCircle's identity. Test whether genuinely worthwhile, current offers drive repeat use and merchant participation; retain broader local editorial discovery as the durable platform. Do not force artificial merchant posting cadence or allow offer scarcity to hollow out the experience.
-4. **Occasion-based discovery.** Content and future retrieval answer practical needs: pre-show dining, late-night food, date nights within a defined budget, and relevant options near a venue. Each recommendation should explain why it qualifies.
-5. **Editorial integrity.** Inclusion is based on usefulness and evidence. Paid placements are disclosed and separated from editorial decisions. No fabricated reviews, firsthand claims, popularity, partnerships or unsupported local experience.
-6. **Crawlable information architecture.** Server-rendered primary content, stable URL contracts, accurate metadata, valid structured data, contextual internal links, controlled sitemap eligibility, redirect integrity and automated HTTP/SEO regression checks.
-7. **Useful audience relationships.** Newsletter and direct feedback loops bring users back, expose information gaps, and help us improve the product beyond one-time search visits.
+5. **Occasion-based discovery.** Content and future retrieval answer practical needs: pre-show dining, late-night food, date nights within a defined budget, and relevant options near a venue. Each recommendation should explain why it qualifies.
+6. **Editorial integrity.** Inclusion is based on usefulness and evidence. Paid placements are disclosed and separated from editorial decisions. No fabricated reviews, firsthand claims, popularity, partnerships or unsupported local experience.
+7. **Crawlable information architecture.** Server-rendered primary content, stable URL contracts, accurate metadata, valid structured data, contextual internal links, controlled sitemap eligibility, redirect integrity and automated HTTP/SEO regression checks.
+8. **Useful audience relationships.** Newsletter and direct feedback loops bring users back, expose information gaps, and help us improve the product beyond one-time search visits.
 
 Search discoverability is paramount, but rankings, indexing, rich results and AI citations are outcomes to earn, not guarantees. Schema markup and technical SEO are foundations; they do not replace original usefulness, evidence, freshness, authority, or good user experience.
 
