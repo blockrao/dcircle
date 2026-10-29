@@ -13,10 +13,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
   const supabase = createPublicSupabaseClient();
 
-  const [placesResult, guidesResult] = await Promise.all([
+  const [placesResult, guidesResult, neighborhoodsResult] = await Promise.all([
     supabase
       .from("places")
-      .select("id,slug,updated_at")
+      .select("id,slug,updated_at,neighborhood_id")
       .eq("publication_status", "published")
       .not("published_at", "is", null),
     supabase
@@ -25,14 +25,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq("publication_status", "published")
       .not("published_at", "is", null)
       .not("reviewed_at", "is", null),
+    supabase
+      .from("neighborhoods")
+      .select("id,slug,updated_at")
+      .eq("publication_status", "published"),
   ]);
 
-  if (placesResult.error || guidesResult.error) {
+  if (placesResult.error || guidesResult.error || neighborhoodsResult.error) {
     throw new Error("Unable to build sitemap from published content.");
   }
 
   const places = placesResult.data ?? [];
   const guides = guidesResult.data ?? [];
+  const neighborhoods = neighborhoodsResult.data ?? [];
   const eligiblePlaceIds = await getEligiblePlaceIds(
     supabase,
     places.map((place) => place.id),
@@ -74,6 +79,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
     }));
 
+  const neighborhoodRoutes = neighborhoods
+    .filter((neighborhood) => places.filter((place) => place.neighborhood_id === neighborhood.id && eligiblePlaceIds.has(place.id)).length >= 3)
+    .map((neighborhood) => ({
+      route: `/neighborhoods/${neighborhood.slug}`,
+      lastModified: neighborhood.updated_at,
+      priority: 0.75,
+      changeFrequency: "weekly" as const,
+    }));
+
   const guideRoutes = guides
     .filter((guide) => guidesWithSources.has(guide.id) && guidesWithEligiblePlaces.has(guide.id))
     .map((guide) => ({
@@ -84,7 +98,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
   const routes: MetadataRoute.Sitemap = [];
-  for (const item of [...staticRoutes, ...placeRoutes, ...guideRoutes]) {
+  for (const item of [...staticRoutes, ...placeRoutes, ...neighborhoodRoutes, ...guideRoutes]) {
     const lastModified =
       "lastModified" in item && typeof item.lastModified === "string"
         ? item.lastModified
