@@ -89,7 +89,7 @@ $test$;
 
 -- Seed one published alias and one unpublished alias for role-scoped RLS tests.
 INSERT INTO public.places (slug, name, publication_status, published_at)
-VALUES ('unpublished-rsl-fixture', 'Unpublished RLS fixture', 'draft', NULL);
+VALUES ('unpublished-rls-fixture', 'Unpublished RLS fixture', 'draft', NULL);
 
 INSERT INTO public.place_slug_history (old_slug, place_id)
 SELECT 'published-rsl-fixture', id
@@ -97,9 +97,9 @@ FROM public.places
 WHERE slug = 'serious-pizza-deep-ellum';
 
 INSERT INTO public.place_slug_history (old_slug, place_id)
-SELECT 'unpublished-rsl-fixture-old', id
+SELECT 'unpublished-rls-fixture-old', id
 FROM public.places
-WHERE slug = 'unpublished-rsl-fixture';
+WHERE slug = 'unpublished-rls-fixture';
 
 -- Anonymous users may read aliases only for published places and cannot write.
 SET LOCAL ROLE anon;
@@ -110,7 +110,7 @@ DECLARE
 BEGIN
   SELECT count(*) INTO visible_count
   FROM public.place_slug_history
-  WHERE old_slug IN ('published-rsl-fixture', 'unpublished-rsl-fixture-old');
+  WHERE old_slug IN ('published-rsl-fixture', 'unpublished-rls-fixture-old');
 
   IF visible_count <> 1 THEN
     RAISE EXCEPTION 'anon must see exactly the published alias; saw %', visible_count;
@@ -141,7 +141,7 @@ DECLARE
 BEGIN
   SELECT count(*) INTO visible_count
   FROM public.place_slug_history
-  WHERE old_slug IN ('published-rsl-fixture', 'unpublished-rsl-fixture-old');
+  WHERE old_slug IN ('published-rsl-fixture', 'unpublished-rls-fixture-old');
 
   IF visible_count <> 1 THEN
     RAISE EXCEPTION 'authenticated must see exactly the published alias; saw %', visible_count;
