@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { connection } from "next/server";
 import type { Json } from "@/lib/local-discovery-database.types";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
+import { placeEntityId } from "@/lib/place-entity";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -177,7 +178,7 @@ export default async function PlacePage({ params }: PageProps) {
     "@type": schemaType,
     // The entity identifier is based on the immutable database UUID, not the
     // mutable public slug. It therefore survives canonical URL changes.
-    "@id": `https://dallascircle.com/id/place/${place.id}`,
+    "@id": placeEntityId(place.id),
     mainEntityOfPage: `https://dallascircle.com/places/${place.slug}`,
     name: place.name,
     // Keep the business's official website distinct from DallasCircle's
