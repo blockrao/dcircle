@@ -86,7 +86,8 @@ export default async function NeighborhoodPage({ params }: PageProps) {
         position: index + 1,
         item: {
           "@type": "LocalBusiness",
-          "@id": `${SITE_URL}/places/${place.slug}`,
+          // Reuse the immutable place entity ID used by its profile and guides.
+          "@id": `${SITE_URL}/id/place/${place.id}`,
           url: `${SITE_URL}/places/${place.slug}`,
           name: place.name,
         },
