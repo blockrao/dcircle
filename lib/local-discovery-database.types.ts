@@ -51,6 +51,32 @@ export type LocalDiscoveryDatabase = {
         }
         Relationships: []
       }
+      place_slug_history: {
+        Row: {
+          created_at: string
+          old_slug: string
+          place_id: string
+        }
+        Insert: {
+          created_at?: string
+          old_slug: string
+          place_id: string
+        }
+        Update: {
+          created_at?: string
+          old_slug?: string
+          place_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_slug_history_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       place_categories: {
         Row: {
           category_id: string
