@@ -208,7 +208,7 @@ assert.ok(ogImage, "Homepage must expose an Open Graph image.");
 assert.ok(twitterImage, "Homepage must expose a Twitter image.");
 const socialImageResponse = await getResponse(new URL(ogImage, canonicalBase));
 assert.equal(socialImageResponse.status, 200, "Generated social preview image must return HTTP 200.");
-assert.match(socialImageResponse.headers.get("content-type") ?? "", /image\\/png/i, "Generated social preview must return PNG.");
+assert.ok((socialImageResponse.headers.get("content-type") ?? "").toLowerCase().includes("image/png"), "Generated social preview must return PNG.");
 assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
 assert.ok(homepage.includes(neighborhoodPath), "Homepage should link to the eligible Deep Ellum neighborhood page.");
 assert.ok(homepage.includes(explorePath), "Homepage should link to the editorial explore hub.");
