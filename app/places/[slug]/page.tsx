@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { connection } from "next/server";
 import type { Json } from "@/lib/local-discovery-database.types";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
@@ -20,7 +20,28 @@ async function getPublishedPlace(slug: string) {
     .maybeSingle();
 
   if (error) throw new Error(`Unable to load place: ${error.message}`);
-  if (!data) return null;
+  if (!data) {
+    const { data: historicalSlug, error: historyError } = await supabase
+      .from("place_slug_history")
+      .select("place_id")
+      .eq("old_slug", slug)
+      .maybeSingle();
+
+    if (historyError) throw new Error("Unable to resolve historical place URL.");
+    if (historicalSlug) {
+      const { data: currentPlace, error: currentPlaceError } = await supabase
+        .from("places")
+        .select("slug")
+        .eq("id", historicalSlug.place_id)
+        .eq("publication_status", "published")
+        .not("published_at", "is", null)
+        .maybeSingle();
+
+      if (currentPlaceError) throw new Error("Unable to resolve the current place URL.");
+      if (currentPlace) permanentRedirect(`/places/${currentPlace.slug}`);
+    }
+    return null;
+  }
 
   const eligiblePlaceIds = await getEligiblePlaceIds(supabase, [data.id]);
   return eligiblePlaceIds.has(data.id) ? data : null;
@@ -154,7 +175,9 @@ export default async function PlacePage({ params }: PageProps) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": schemaType,
-    "@id": `https://dallascircle.com/places/${place.slug}`,
+    // The entity identifier is based on the immutable database UUID, not the
+    // mutable public slug. It therefore survives canonical URL changes.
+    "@id": `https://dallascircle.com/id/place/${place.id}`,
     mainEntityOfPage: `https://dallascircle.com/places/${place.slug}`,
     name: place.name,
     // Keep the business's official website distinct from DallasCircle's
