@@ -1,0 +1,78 @@
+-- Regression coverage for permanent place slugs and stable identity.
+-- Run against a disposable database or with the surrounding transaction intact.
+BEGIN;
+
+DO $test$
+DECLARE
+  target_id uuid;
+  original_slug text;
+  temporary_slug text;
+  alias_count integer;
+  rejected_reuse boolean := false;
+BEGIN
+  SELECT id, slug
+    INTO target_id, original_slug
+  FROM public.places
+  WHERE slug = 'serious-pizza-deep-ellum'
+    AND publication_status = 'published'
+  LIMIT 1;
+
+  IF target_id IS NULL THEN
+    RAISE EXCEPTION 'Expected published Serious Pizza fixture was not found';
+  END IF;
+
+  temporary_slug := original_slug || '-slug-history-regression';
+
+  UPDATE public.places
+  SET slug = temporary_slug
+  WHERE id = target_id;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.place_slug_history
+    WHERE old_slug = original_slug AND place_id = target_id
+  ) THEN
+    RAISE EXCEPTION 'First rename did not preserve the previous slug';
+  END IF;
+
+  -- Renaming back reclaims the current slug and preserves the interim alias.
+  UPDATE public.places
+  SET slug = original_slug
+  WHERE id = target_id;
+
+  IF EXISTS (
+    SELECT 1 FROM public.place_slug_history
+    WHERE old_slug = original_slug
+  ) THEN
+    RAISE EXCEPTION 'Reclaimed current slug remained in historical aliases';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.place_slug_history
+    WHERE old_slug = temporary_slug AND place_id = target_id
+  ) THEN
+    RAISE EXCEPTION 'Reversion did not preserve the interim slug';
+  END IF;
+
+  -- A different place must never be allowed to claim a historical slug.
+  BEGIN
+    INSERT INTO public.places (slug, name, publication_status)
+    VALUES (temporary_slug, 'Slug reuse regression fixture', 'draft');
+  EXCEPTION WHEN raise_exception THEN
+    rejected_reuse := true;
+  END;
+
+  IF NOT rejected_reuse THEN
+    RAISE EXCEPTION 'A new place was allowed to reuse a historical slug';
+  END IF;
+
+  SELECT count(*) INTO alias_count
+  FROM public.place_slug_history
+  WHERE old_slug = temporary_slug AND place_id = target_id;
+
+  IF alias_count <> 1 THEN
+    RAISE EXCEPTION 'Historical slug must map to exactly one original place';
+  END IF;
+END;
+$test$;
+
+ROLLBACK;
