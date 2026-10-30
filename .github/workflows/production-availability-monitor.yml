@@ -1,0 +1,81 @@
+name: Production availability monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: production-availability-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    name: Check live production routes and assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify monitor script syntax
+        run: node --check scripts/monitor-production-availability.mjs
+
+      - name: Check production availability
+        id: availability
+        env:
+          SITE_URL: https://dallascircle.com
+        run: node scripts/monitor-production-availability.mjs
+
+      - name: Publish successful check summary
+        if: success()
+        run: |
+          {
+            echo "## DallasCircle production availability"
+            echo ""
+            echo "All monitored production routes and the discovered Next.js static asset returned expected responses."
+            echo ""
+            echo "- Origin: https://dallascircle.com"
+            echo "- Checked at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open one incident issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "[P0] DallasCircle production availability incident";
+            const { owner, repo } = context.repo;
+            const open = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: "open",
+              per_page: 100,
+            });
+            const existing = open.data.find((issue) => issue.title === title);
+            if (existing) {
+              core.info(`Existing incident remains open: ${existing.html_url}`);
+              return;
+            }
+            const body = [
+              "Automated production availability monitoring detected a failed route or static asset check.",
+              "",
+              `- Detected: ${new Date().toISOString()}`,
+              `- Workflow run: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              "- Origin: https://dallascircle.com",
+              "",
+              "Inspect the failed monitor step for HTTP status, latency, content type, and exception details. Correlate the timestamp with Cloudflare Worker Observability, Ray IDs, deployment version, and Supabase errors.",
+              "",
+              "Close this incident only after the affected routes pass repeated checks and the root cause is understood.",
+            ].join("\n");
+            const issue = await github.rest.issues.create({ owner, repo, title, body });
+            core.warning(`Opened production incident: ${issue.data.html_url}`);
