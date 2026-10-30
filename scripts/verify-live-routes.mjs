@@ -261,6 +261,15 @@ for (const path of placePaths) {
     return Array.isArray(schemaType) ? schemaType.includes(type) : schemaType === type;
   }));
   assert.ok(placeSchema, `Missing local-business entity schema on ${path}`);
+  const stableEntityId = new URL(placeSchema["@id"]);
+  assert.match(stableEntityId.pathname, /^\/id\/place\/[0-9a-f-]{36}$/i, `Place @id must be UUID-based on ${path}`);
+  const identityResponse = await getResponse(new URL(stableEntityId.pathname, base));
+  assert.equal(identityResponse.status, 308, `Stable place identity should permanently resolve to its canonical profile on ${path}`);
+  assert.equal(
+    new URL(identityResponse.headers.get("location") ?? "", base).pathname,
+    path,
+    `Stable place identity should redirect to the current canonical profile on ${path}`,
+  );
   assert.equal(
     new URL(typeof placeSchema.mainEntityOfPage === "string" ? placeSchema.mainEntityOfPage : placeSchema.mainEntityOfPage?.["@id"], canonicalBase).href,
     canonicalUrl(path),
