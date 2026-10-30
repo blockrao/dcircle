@@ -141,3 +141,37 @@ These are read-only verification steps; this document authorizes no production d
 - Do not expand beyond Deep Ellum until the initial night-out product is useful and repeatable.
 
 **Next execution step:** Complete source-by-source review of Brick & Bones, Ruins and Off The Cuff, then prepare draft-only record changes with exact provenance for editorial review. No live write is implied by this queue.
+
+
+## 8. Follow-up source review and duplicate check — 30 October 2026
+
+A second read-only production query checked candidate names/official domains and the candidate street addresses against the current `places` records. No matching rows were returned for Brick & Bones, Ruins, Off The Cuff, Angry Dog or Nowhere. This is a first-pass duplicate check only; it does not prove that no informal alias or historical record exists outside the current canonical places table. No production rows were inserted or changed.
+
+### Updated candidate findings
+
+| Candidate | Official-source findings | Editorial disposition |
+|---|---|---|
+| Brick & Bones | Current official location page: 2651 Commerce St, Dallas, TX 75226; 4 p.m.–2 a.m. daily. It explicitly says the business moved from Elm Street after 10 years. Official menu lists food and drink items with prices. Sources: https://bricknbones.com/location/ and https://bricknbones.com/menu/ | **Advance to draft profile research.** Address is confirmed on the current location page. Do not claim kitchen service through 2 a.m. solely from venue hours; verify kitchen cutoff directly or phrase the profile conservatively. |
+| Ruins | Official site: 2653 Commerce, Dallas; kitchen Tue–Thu 4–10 p.m., Fri 4 p.m.–2 a.m., Sat/Sun 2 p.m.–2 a.m.; 21+ after 9 p.m.; walk-ins welcome. Food described as Mexican-focused with Oaxacan influence and dishes across Central/South America and the Caribbean. Sources: https://www.ruinsdeepellum.com/ and https://www.ruinsdeepellum.com/menu | **Advance to draft profile research.** Strongest explicit kitchen-hour evidence for late-night coverage, but hours are day-specific and age restriction is material. Menu page is image-led and did not expose a reliable text menu/pricing in the review; keep price level null pending adequate evidence. |
+| Off The Cuff | Official contact page lists 2901 Elm Street and says kitchen open until 2 a.m. daily. Official homepage and dedicated late-night page say food until 12 a.m. Sources: https://www.otcdallas.com/contact-us-off-the-cuff-dallas/, https://www.otcdallas.com/, https://www.otcdallas.com/late-night-food-deep-ellum/ | **Hold late-night claim.** Do not represent post-midnight kitchen availability as verified until the discrepancy is resolved. The profile may be researched for general dining separately, with the conflict retained in internal notes. |
+| Angry Dog | Official site lists 2726 Commerce Street. Hours: Mon–Thu 11 a.m.–9:30 p.m.; Fri 11 a.m.–11:30 p.m.; Sat 10:30 a.m.–11:30 p.m.; Sun 10:30 a.m.–8:30 p.m. Official menu exposes current item prices. Sources: https://www.angrydog.com/ and https://www.angrydog.com/menu | **Move to pre-show/casual dinner queue, not core after-10 p.m. shortlist.** It closes before 10 p.m. most days and at 11:30 p.m. Friday/Saturday, so it is not a dependable late-night option. |
+| Nowhere | Official visit page lists 2826 Elm St and day-specific hours and links to Resy. Official dinner page publishes a substantial food menu with item prices and states a 20% gratuity plus 3% service charge. Dinner page schedule lists Tue/Fri 7 p.m.–2 a.m., Sat noon–2 a.m., Sun noon–10 p.m.; official contact page presents different hours (Tue–Fri 5 p.m.–late; Sat 11 a.m.–2 a.m.; Sun 11 a.m.–9 p.m.). Sources: https://www.nowheredtx.com/visit, https://www.nowheredtx.com/dinner, https://www.nowheredtx.com/contact-us | **Advance to date-night profile research, but hold hours until reconciled.** Menu and mandatory charges materially support transparent budget content. The official pages disagree on opening times, so do not publish a single schedule as settled without confirmation. |
+
+### Revised after-10 p.m. guide inclusion rules
+
+- **Brick & Bones:** include as a candidate for a 10 p.m.–midnight/late-night option, but distinguish published venue hours from confirmed kitchen cutoff.
+- **Ruins:** strongest candidate for a verified late-night kitchen option on Friday and Saturday (and Sunday, according to the official page); weekday kitchen cutoff is 10 p.m. Include 21+ after 9 p.m. clearly.
+- **Off The Cuff:** exclude from any post-midnight promise until official sources are reconciled. If included for the 10 p.m.–midnight window, identify the discrepancy internally and reconfirm the public-facing statement before publication.
+- **Nowhere:** potentially useful for a late dinner/date-night angle, but current official schedule conflicts need resolution. Do not use the later hours as a guarantee.
+- **Angry Dog:** exclude from the after-10 p.m. core shortlist except potentially Friday/Saturday as a before-midnight option; it is better positioned for the pre-show guide.
+
+### Next research / editorial tasks
+
+1. Obtain direct confirmation from Off The Cuff of the actual kitchen last-call/closing time and update the internal evidence record only after confirmation.
+2. Reconcile Nowhere's hours across its official visit, dinner and contact pages; ask the business if the pages remain inconsistent.
+3. Confirm Brick & Bones kitchen cutoff separately from its 2 a.m. venue closing.
+4. Recheck Ruins' day-specific kitchen hours and 21+ restriction immediately before drafting/publishing.
+5. Prepare draft-only place records for Brick & Bones and Ruins first. Keep all unresolved/volatile facts null or explicitly qualified; do not assign price levels without the project's evidence methodology.
+6. Draft the after-10 p.m. guide only after these checks, using a day/time matrix rather than a generic claim that all listed kitchens are open late.
+
+No database writes, content publication, deployment, or production configuration changes were performed in this follow-up.
