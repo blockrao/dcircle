@@ -83,8 +83,16 @@ function assertCanonicalEntityIds(html, path) {
   assert.ok(entityIds.length > 0, `Missing stable JSON-LD @id on ${path}`);
   for (const entityId of entityIds) {
     const parsed = new URL(entityId, canonicalBase);
-    assert.equal(parsed.href, expectedUrl, `JSON-LD @id must match the canonical page URL on ${path}`);
     assert.equal(parsed.origin, canonicalBase.origin, `JSON-LD @id must use canonical origin on ${path}`);
+    if (path.startsWith("/places/")) {
+      assert.match(
+        parsed.pathname,
+        /^\/id\/place\/[0-9a-f-]{36}$/i,
+        `Place @id must use its immutable UUID identity, independent of the mutable slug on ${path}`,
+      );
+    } else {
+      assert.equal(parsed.href, expectedUrl, `Page @id must match the canonical page URL on ${path}`);
+    }
     assert.ok(!parsed.href.toLowerCase().includes("praveenyadav"), `Personal-name URL is forbidden on ${path}`);
   }
 
@@ -203,11 +211,22 @@ assert.equal(
   `${canonicalUrl(neighborhoodPath)}#place`,
   "Neighborhood Place entity should have a stable identity distinct from the CollectionPage URL.",
 );
+const placeEntityIdsByPath = new Map();
+for (const path of placePaths) {
+  const html = await getPage(path);
+  const placeSchemas = getJsonLd(html, path);
+  const placeSchema = placeSchemas.find((block) => ["Restaurant", "BarOrPub", "LocalBusiness"].some((type) => {
+    const schemaType = block["@type"];
+    return Array.isArray(schemaType) ? schemaType.includes(type) : schemaType === type;
+  }));
+  assert.ok(placeSchema && typeof placeSchema["@id"] === "string", `Place profile must expose its stable entity ID on ${path}`);
+  placeEntityIdsByPath.set(path, placeSchema["@id"]);
+}
 const neighborhoodItems = neighborhoodSchema.mainEntity?.itemListElement ?? [];
 for (const path of placePaths) {
   assert.ok(
-    neighborhoodItems.some((item) => item.item?.["@id"] === canonicalUrl(path)),
-    `Neighborhood ItemList should reference canonical place entity ${canonicalUrl(path)}`,
+    neighborhoodItems.some((item) => item.item?.["@id"] === placeEntityIdsByPath.get(path)),
+    `Neighborhood ItemList should reference the same stable place entity ID as ${path}`,
   );
 }
 for (const path of placePaths) {
@@ -225,8 +244,8 @@ const guidePlaceEntityIds = guideSchemas.flatMap((block) =>
 ).filter((value) => typeof value === "string");
 for (const path of placePaths) {
   assert.ok(
-    guidePlaceEntityIds.includes(canonicalUrl(path)),
-    `Guide JSON-LD should reference canonical place entity ${canonicalUrl(path)}`,
+    guidePlaceEntityIds.includes(placeEntityIdsByPath.get(path)),
+    `Guide JSON-LD should reference the same stable place entity ID as ${path}`,
   );
 }
 
