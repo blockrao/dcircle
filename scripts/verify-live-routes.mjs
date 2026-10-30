@@ -78,8 +78,11 @@ function getJsonLd(html, label) {
 function assertSchemaType(html, label, expectedTypes) {
   const blocks = getJsonLd(html, label);
   const types = blocks.flatMap((block) => {
-    const value = block["@type"];
-    return Array.isArray(value) ? value : value ? [value] : [];
+    const entities = [block, ...(Array.isArray(block["@graph"]) ? block["@graph"] : [])];
+    return entities.flatMap((entity) => {
+      const value = entity["@type"];
+      return Array.isArray(value) ? value : value ? [value] : [];
+    });
   });
   assert.ok(
     expectedTypes.some((expected) => types.includes(expected)),
