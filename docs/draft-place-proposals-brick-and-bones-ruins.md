@@ -204,3 +204,45 @@ A targeted search of the official domain and current location information did no
 ### Editorial consequence
 
 The after-10 p.m. guide must not present either venue as a guaranteed late-night food option until the exact food-service cutoff is confirmed. A venue's advertised closing time is not evidence that its kitchen is still taking orders.
+
+
+## Follow-up research pass — 30 October 2026 (official pages rechecked)
+
+### Brick & Bones — stronger late-night positioning, kitchen cutoff still not explicit
+
+The current official location page states that the venue is open every day 4 p.m.–2 a.m. and markets the venue for “late-night food”; its homepage also describes it as a walk-in-friendly spot serving food late into the night. These are useful positioning signals, but neither page gives a day-specific final food-order/kitchen cutoff. Do not translate venue closing into a verified kitchen closing time.
+
+Official contact details displayed by the business:
+- Phone: +1 (469) 914-6776
+- Email: manager@bricknbones.com
+
+Sources rechecked:
+- https://bricknbones.com/location/
+- https://bricknbones.com/
+- https://bricknbones.com/menu/
+
+A direct confirmation is still needed: “On each day of the week, what time is the kitchen's last food order? Does the kitchen continue taking orders until 2 a.m., or does food service stop earlier?”
+
+### Ruins — explicit kitchen schedule is present in the current official page body
+
+The current official homepage body again states:
+- Tuesday–Thursday: kitchen 4 p.m.–10 p.m.
+- Friday: kitchen 4 p.m.–2 a.m.
+- Saturday–Sunday: kitchen 2 p.m.–2 a.m.
+- 21+ venue after 9 p.m.
+- Walk-ins welcome; reservations not required.
+
+The compressed header continues to display “4P-2A WedS - Fri / 2P-2A Sat - Sun”, which appears to be a shorthand venue-hours display and does not match the precision or weekday coverage of the kitchen paragraph. The explicit kitchen paragraph is the best available official evidence for food-service hours. Still, before we publish a guide that makes a high-confidence promise about late-night food, ask the venue to confirm the schedule and whether the 21+ rule applies to the entire venue after 9 p.m.
+
+Official phone displayed by the business: +1 972-707-0607.
+
+Sources rechecked:
+- https://www.ruinsdeepellum.com/
+- https://www.ruinsdeepellum.com/menu
+- https://www.ruinsdeepellum.com/food-and-drink
+
+### Current publication posture
+
+- Brick & Bones: profile may describe its official late-night positioning and venue hours, but must not claim kitchen service until 2 a.m. without direct confirmation.
+- Ruins: official body-published day-specific kitchen hours can be retained as source-backed candidate facts, with the header/body ambiguity documented. For an after-10 p.m. guide, seek direct confirmation first and make the 21+ after-9 p.m. restriction prominent.
+- No production writes, publication, or deployment have been performed.
