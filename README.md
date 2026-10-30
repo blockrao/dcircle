@@ -16,7 +16,7 @@ The product and architecture decision record is [`docs/vision-and-strategic-dire
 - Make Deep Ellum the first complete, useful, source-backed launch area; expand other localities and topics in coverage-qualified waves.
 - Keep place facts, source provenance, editorial content, publication state, and sponsorship status distinct.
 - Do not build merchant dashboards, claims workflows, marketplace features, or broad directory coverage before demand justifies them.
-- Do not include technical consulting, software services, or agency offerings in the product.
+- Do not include PHP development, website audits, technical consulting, software/IT services, agency offerings, or related service-sales/lead-generation funnels. DallasCircle is exclusively a hyperlocal discovery and editorial product.
 
 ## Technology
 
