@@ -27,6 +27,8 @@ CREATE POLICY public_read_slug_history_for_published_places
 
 GRANT SELECT (old_slug, place_id)
   ON public.place_slug_history TO anon, authenticated;
+GRANT SELECT, INSERT, DELETE
+  ON public.place_slug_history TO service_role;
 
 CREATE OR REPLACE FUNCTION public.record_place_slug_history()
 RETURNS trigger
@@ -34,6 +36,17 @@ LANGUAGE plpgsql
 SET search_path = pg_catalog
 AS $function$
 BEGIN
+  IF TG_OP = 'INSERT' THEN
+    IF EXISTS (
+      SELECT 1
+      FROM public.place_slug_history h
+      WHERE h.old_slug = NEW.slug
+    ) THEN
+      RAISE EXCEPTION 'The requested place slug is reserved in canonical slug history';
+    END IF;
+    RETURN NEW;
+  END IF;
+
   IF NEW.slug IS DISTINCT FROM OLD.slug THEN
     IF EXISTS (
       SELECT 1
@@ -68,7 +81,7 @@ END;
 $function$;
 
 CREATE TRIGGER places_record_slug_history
-  BEFORE UPDATE OF slug ON public.places
+  BEFORE INSERT OR UPDATE OF slug ON public.places
   FOR EACH ROW
   EXECUTE FUNCTION public.record_place_slug_history();
 
