@@ -86,7 +86,7 @@ async function getFeaturedNeighborhood() {
 
 async function FeaturedNeighborhoodSection() {
   const featuredNeighborhood = await getFeaturedNeighborhood();
-  return ({featuredNeighborhood ? (
+  return (featuredNeighborhood ? (
         <section aria-labelledby="neighborhood-discovery-heading" className="border-b border-stone-200 bg-amber-50 px-6 py-10">
           <div className="mx-auto flex max-w-6xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
@@ -102,7 +102,7 @@ async function FeaturedNeighborhoodSection() {
 
 async function FeaturedPlacesSection() {
   const featuredPlaces = await getFeaturedPlaces();
-  return ({featuredPlaces.length > 0 ? (
+  return (featuredPlaces.length > 0 ? (
         <section aria-labelledby="featured-places-heading" className="border-y border-stone-200 bg-white px-6 py-20 md:py-24">
           <div className="mx-auto max-w-6xl">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
