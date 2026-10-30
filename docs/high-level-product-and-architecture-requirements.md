@@ -132,7 +132,7 @@ Priority definitions:
 - Each public page must have a single primary purpose and clear next action.
 - Mobile experience, accessibility, performance, and simple navigation are launch requirements.
 
-**Acceptance:** No legacy technical-service positioning remains in the consumer-facing product. DallasCircle is exclusively a Dallas hyperlocal discovery platform; technical consulting and agency offerings are out of scope. Every visible link is checked against a real route.
+**Acceptance:** DallasCircle presents a coherent Dallas hyperlocal discovery experience. Every visible link leads to a real, relevant local-discovery route.
 
 ### P0-B. Canonical data model
 
