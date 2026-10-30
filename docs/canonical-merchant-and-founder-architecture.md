@@ -12,7 +12,7 @@ Every merchant that qualifies for public publication must have:
 - one permanent public profile URL;
 - one canonical URL and self-referencing canonical tag;
 - one authoritative structured profile record;
-- one consistent entity identifier for structured data and cross-page references;
+- one consistent, immutable entity identifier for structured data and cross-page references, derived from the internal UUID rather than the mutable slug;
 - explicit category, locality, source, fact, freshness, correction, and publication relationships.
 
 The same merchant record and canonical URL must be reused in all DallasCircle guides, articles, locality pages, topic pages, curated collections, and ranked lists. Do not create separate merchant copies for different editorial contexts.
@@ -28,9 +28,12 @@ Choose one route pattern before broad inventory creation and keep it stable. The
 The route should not encode a mutable category or locality in a way that forces a URL change when a business is reclassified or relocates. The profile should contain canonical locality/category relationships as data.
 
 Rules:
-- Unique stable slug and immutable internal ID.
+- Unique current slug and immutable internal ID.
+- Stable place entity URI: `https://dallascircle.com/id/place/{uuid}`. This identifier is not a navigational profile route and must not change when the public slug changes.
+- The canonical profile URL remains `https://dallascircle.com/places/{current-slug}`; emit it as the page URL and `mainEntityOfPage`, separately from the stable entity `@id`.
+- Reserve historical slugs permanently for the same place entity. A historical profile URL must issue a permanent 308 redirect to the current canonical profile. Never let a historical slug silently resolve to a different place.
 - One canonical URL per merchant entity; no category/locality/filter-specific duplicate profile URLs.
-- If a slug changes, issue a permanent redirect from the old URL, update internal links, canonical metadata, and sitemap.
+- If a slug changes, preserve the old slug in `place_slug_history`, issue a permanent 308 redirect from the old URL, update internal links, canonical metadata, and sitemap. Historical slugs cannot be reassigned to another place.
 - If a merchant closes, handle closure status and the page according to evidence and user value; do not automatically recycle the URL for another merchant.
 - Distinguish one business/brand from multiple physical locations. When branches have materially different addresses or customer-facing details, model the business/organization and location entities appropriately rather than merging them into one misleading listing.
 - Never publish a profile solely because a row exists; apply explicit completeness, evidence, and editorial thresholds.
@@ -140,7 +143,9 @@ Rendering, internal links, structured data, and sitemap generation must share th
 
 - Every published merchant resolves to exactly one stable canonical profile URL.
 - Guides/articles/collections link to that URL and do not create duplicate merchant copies.
-- Merchant ID and structured-data `@id` are stable across content contexts.
+- Merchant ID and structured-data `@id` are stable across content contexts and slug changes; the canonical profile URL and `mainEntityOfPage` use the current slug.
+- A slug change creates a historical alias and a permanent redirect; old slugs cannot be reused by another place.
+- Guides and neighborhood ItemLists reference the exact same immutable place `@id` emitted by the canonical profile.
 - Slug-change redirects and canonical/sitemap updates are tested.
 - Merchant category/locality filters use canonical relations and do not generate indexable thin variants.
 - JSON-LD matches visible content and uses an appropriate business subtype.

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
+import { placeEntityId } from "@/lib/place-entity";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -86,7 +87,8 @@ export default async function NeighborhoodPage({ params }: PageProps) {
         position: index + 1,
         item: {
           "@type": "LocalBusiness",
-          "@id": `${SITE_URL}/places/${place.slug}`,
+          // Reuse the immutable place entity ID used by its profile and guides.
+          "@id": placeEntityId(place.id),
           url: `${SITE_URL}/places/${place.slug}`,
           name: place.name,
         },
