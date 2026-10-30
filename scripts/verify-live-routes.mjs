@@ -368,7 +368,7 @@ if (historicalPlaceSlug) {
     `Historical place slug ${historicalPlaceSlug} should permanently redirect; got ${historicalResponse.status}`,
   );
   const historicalDestination = new URL(historicalResponse.headers.get("location") ?? "", base);
-  assert.match(historicalDestination.pathname, /^\\/places\\/[a-z0-9-]+$/i, "Historical slug must redirect to a current canonical place route.");
+  assert.match(historicalDestination.pathname, /^\/places\/[a-z0-9-]+$/i, "Historical slug must redirect to a current canonical place route.");
   assert.notEqual(historicalDestination.pathname, historicalPath, "Historical slug must not redirect to itself.");
 }
 
