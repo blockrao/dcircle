@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { connection } from "next/server";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
 import { createPublicSupabaseClient } from "@/lib/supabase";
@@ -83,12 +84,49 @@ async function getFeaturedNeighborhood() {
   }
 }
 
-export default async function HomePage() {
-  const [featuredPlaces, featuredNeighborhood] = await Promise.all([
-    getFeaturedPlaces(),
-    getFeaturedNeighborhood(),
-  ]);
+async function FeaturedNeighborhoodSection() {
+  const featuredNeighborhood = await getFeaturedNeighborhood();
+  return ({featuredNeighborhood ? (
+        <section aria-labelledby="neighborhood-discovery-heading" className="border-b border-stone-200 bg-amber-50 px-6 py-10">
+          <div className="mx-auto flex max-w-6xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-800">Explore the neighborhood</p>
+              <h2 id="neighborhood-discovery-heading" className="mt-2 text-2xl font-bold text-slate-900">{featuredNeighborhood.name}, Dallas</h2>
+              <p className="mt-2 max-w-2xl leading-7 text-slate-700">{featuredNeighborhood.description?.trim() || "Browse local place profiles that meet our evidence and publication checks."}</p>
+            </div>
+            <Link href={"/neighborhoods/" + featuredNeighborhood.slug} className="inline-flex shrink-0 items-center justify-center rounded-lg bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">Explore neighborhood</Link>
+          </div>
+        </section>
+      ) : null);
+}
 
+async function FeaturedPlacesSection() {
+  const featuredPlaces = await getFeaturedPlaces();
+  return ({featuredPlaces.length > 0 ? (
+        <section aria-labelledby="featured-places-heading" className="border-y border-stone-200 bg-white px-6 py-20 md:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div className="max-w-2xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">Explore Deep Ellum</p>
+                <h2 id="featured-places-heading" className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">Places with details you can check.</h2>
+                <p className="mt-4 text-lg leading-7 text-slate-600">Browse published profiles that meet our current evidence and source standards. Each profile links to its own verified details and references.</p>
+              </div>
+            </div>
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredPlaces.map((place) => (
+                <article key={place.id} className="flex h-full flex-col rounded-2xl border border-stone-200 bg-stone-50 p-6">
+                  <h3 className="text-xl font-bold">{place.name}</h3>
+                  {place.summary ? <p className="mt-3 flex-1 leading-7 text-slate-600">{place.summary}</p> : <p className="mt-3 flex-1 leading-7 text-slate-600">See the profile for source-backed details and official links.</p>}
+                  <Link href={`/places/${place.slug}`} className="mt-5 inline-flex font-semibold text-amber-800 underline underline-offset-4">View place profile</Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null);
+}
+
+export default function HomePage() {
   return (
     <main className="min-h-screen bg-stone-50 text-slate-900">
       <section className="relative overflow-hidden bg-slate-950 px-6 py-24 text-white md:py-32">
@@ -122,18 +160,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featuredNeighborhood ? (
-        <section aria-labelledby="neighborhood-discovery-heading" className="border-b border-stone-200 bg-amber-50 px-6 py-10">
-          <div className="mx-auto flex max-w-6xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-800">Explore the neighborhood</p>
-              <h2 id="neighborhood-discovery-heading" className="mt-2 text-2xl font-bold text-slate-900">{featuredNeighborhood.name}, Dallas</h2>
-              <p className="mt-2 max-w-2xl leading-7 text-slate-700">{featuredNeighborhood.description?.trim() || "Browse local place profiles that meet our evidence and publication checks."}</p>
-            </div>
-            <Link href={"/neighborhoods/" + featuredNeighborhood.slug} className="inline-flex shrink-0 items-center justify-center rounded-lg bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">Explore neighborhood</Link>
-          </div>
-        </section>
-      ) : null}
+      <Suspense fallback={null}><FeaturedNeighborhoodSection /></Suspense>
 
       <section id="planning-guides" className="px-6 py-20 md:py-24">
         <div className="mx-auto max-w-6xl">
@@ -163,28 +190,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featuredPlaces.length > 0 ? (
-        <section aria-labelledby="featured-places-heading" className="border-y border-stone-200 bg-white px-6 py-20 md:py-24">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <div className="max-w-2xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">Explore Deep Ellum</p>
-                <h2 id="featured-places-heading" className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">Places with details you can check.</h2>
-                <p className="mt-4 text-lg leading-7 text-slate-600">Browse published profiles that meet our current evidence and source standards. Each profile links to its own verified details and references.</p>
-              </div>
-            </div>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredPlaces.map((place) => (
-                <article key={place.id} className="flex h-full flex-col rounded-2xl border border-stone-200 bg-stone-50 p-6">
-                  <h3 className="text-xl font-bold">{place.name}</h3>
-                  {place.summary ? <p className="mt-3 flex-1 leading-7 text-slate-600">{place.summary}</p> : <p className="mt-3 flex-1 leading-7 text-slate-600">See the profile for source-backed details and official links.</p>}
-                  <Link href={`/places/${place.slug}`} className="mt-5 inline-flex font-semibold text-amber-800 underline underline-offset-4">View place profile</Link>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <Suspense fallback={null}><FeaturedPlacesSection /></Suspense>
 
       <section id="our-approach" className="border-y border-stone-200 bg-white px-6 py-20 md:py-24">
         <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
