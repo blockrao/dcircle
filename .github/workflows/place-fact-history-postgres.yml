@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "supabase/migrations/20261029160000_create_place_fact_history.sql"
+      - "supabase/migrations/20261030040000_create_place_fact_history.sql"
       - "supabase/tests/place-fact-history.sql"
       - "supabase/tests/place-fact-history-fixture.sql"
       - ".github/workflows/place-fact-history-postgres.yml"
@@ -53,7 +53,7 @@ jobs:
           PGPASSWORD: postgres
         run: |
           psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d dcircle_test \
-            -f supabase/migrations/20261029160000_create_place_fact_history.sql
+            -f supabase/migrations/20261030040000_create_place_fact_history.sql
 
       - name: Run rollback-only insert/update/delete and access-control regression
         env:
