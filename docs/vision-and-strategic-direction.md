@@ -91,7 +91,7 @@ Search discoverability is paramount, but rankings, indexing, rich results and AI
 - Merchant dashboards, claims workflows, marketplace features or public write APIs.
 - A native mobile app, loyalty platform, complex recommendation AI or separate search service.
 - A CMS, second database, ORM migration or large new infrastructure layer without a demonstrated need.
-- Technical consulting, agency services, or software-service offers inside the consumer product.
+- DallasCircle is exclusively a hyperlocal discovery and editorial product, with place profiles, locality guides, events, culture, food, and useful local information.
 
 ## 5A. Experience and locality strategy
 

@@ -2,7 +2,7 @@
 
 **Baseline:** Strategy & Product Definition dated 23 October 2026; authoritative strategic baseline in `docs/vision-and-strategic-direction.md`; execution sequence in `docs/roadmap-and-discoverability-operating-plan.md`.  
 **Working branch:** `seo/technical-foundation`  
-**Product boundary:** DallasCircle is an editorial-led local discovery platform for Dallas localities and a broad range of local topics. Deep Ellum is the first complete launch area, not the permanent geographic boundary. No technical consulting, software modernization, or agency services belong in the product.  
+**Product boundary:** DallasCircle is an editorial-led hyperlocal discovery platform for Dallas localities and local topics. Deep Ellum is the first complete launch area, not the permanent geographic boundary.  
 **Delivery principle:** one small, verifiable vertical slice at a time. Do not merge or deploy until build, route, security, and SEO checks have been run.
 
 ## P0 — Foundation gates

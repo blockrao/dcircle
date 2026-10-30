@@ -18,7 +18,7 @@ These findings are a source of unnecessary exposure, but they do not establish t
 
 ## Changes applied and verified
 
-Fourteen migration versions are now represented in the live project and branch. The historical baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). The thirteen subsequent applied migrations are also represented under `supabase/migrations/`; the legacy-retirement migration is staged but not yet applied.
+Sixteen migration versions are recorded in the live project: the historical baseline plus fifteen subsequent migrations. The baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). All fifteen subsequent migration files, through `20261030033436_retire_legacy_business_services_schema`, are represented under `supabase/migrations/`. The retirement migration file is committed in this branch and matches the migration already recorded in live Supabase history; it must not be re-applied to the production database.
 
 1. `20261028152728_revoke_legacy_public_schema_grants`
    - Revoked all table privileges from `anon` and `authenticated` across existing public-schema tables.
@@ -47,6 +47,8 @@ Fourteen migration versions are now represented in the live project and branch. 
    - Added indexes for the composite place-fact/source foreign key and neighborhood foreign key.
 12. `20261028155619_seed_first_deep_ellum_editorial_slice`
    - Seeded three source-backed place profiles, verified hours/kitchen facts with review dates, one guide, source records, and guide/place relationships.
+13. `20261028161824_harden_public_ddl_default_grants`
+   - Hardened the public-schema DDL event-trigger behavior so new objects default to least-privilege access.
 
 Verification after applying these migrations confirmed:
 - no table-level INSERT/UPDATE/DELETE grants for `anon` or `authenticated` on the canonical content tables; explicit SELECT grants are limited to public content, with column-level projections for source/fact/relationship tables;
@@ -57,7 +59,7 @@ Verification after applying these migrations confirmed:
 - `anon` cannot insert places and cannot select internal notes from source/fact tables;
 - place and guide publication gates passed positive and negative checks using temporary rows that were rolled back.
 
-The service role retains the required function privileges. No legacy rows or tables were deleted. The canonical schema now contains the published Deep Ellum neighborhood, three published place profiles, one published guide, and their source/fact/category/guide relationships.
+The service role retains the required function privileges. The 14 retired tables were confirmed to contain zero rows before removal and have since been dropped from the live database. The canonical schema now contains the published Deep Ellum neighborhood, three published place profiles, one published guide, and their source/fact/category/guide relationships.
 
 ## Canonical local-discovery schema implemented
 
@@ -107,36 +109,28 @@ References:
 - A live catalog query confirms all nine canonical local-discovery tables have RLS enabled and one policy each. `anon` has no INSERT, UPDATE, or DELETE privilege on those tables; public SELECT is available on the intended published content tables. Source and relationship tables use column-level SELECT grants, so table-level `has_table_privilege(..., 'SELECT')` can be false even when approved columns are readable.
 - Earlier transaction-rollback regression tests verified that anonymous writes and internal-note reads are denied, publication integrity checks reject invalid changes, and test rows are rolled back.
 
-The underlying `supabase_admin` default ACL remains broad by platform design, but current Supabase guidance does not provide a supported project-level fix. **It is not a standalone release blocker after the trigger and actual object grants are verified.** Keep the fail-closed trigger, re-run catalog/advisor checks after database/platform changes, and explicitly review extension-created objects. Do not claim the underlying ACL has been changed, do not disable the trigger, and do not apply the staged legacy-retirement migration until application dependency and release checks are complete.
+The underlying `supabase_admin` default ACL remains broad by platform design, but current Supabase guidance does not provide a supported project-level fix. **It is not a standalone release blocker after the trigger and actual object grants are verified.** Keep the fail-closed trigger, re-run catalog/advisor checks after database/platform changes, and explicitly review extension-created objects. Do not claim the underlying ACL has been changed or disable the trigger. The legacy-table retirement has since been applied and verified separately, and its matching migration file is now synchronized in the repository.
 
-## Legacy schema still present
+## Current database state
 
-The database still contains empty legacy tables, including `service_leads`, `website_audits`, `leads`, `consultations`, `conversions`, merchant claims/permissions, and the older business/editorial tables. Their application routes/helpers were removed from the feature branch, but the tables have **not** been dropped. Keep this distinction explicit. Table removal should be part of a reviewed schema replacement after dependency and ownership checks, not an untracked destructive change.
+The canonical local-discovery schema is the active application data model. The obsolete business-services tables and their unused enum types have been removed from the live Dallas database by migration `20261030033436_retire_legacy_business_services_schema`. An exact pre-removal count confirmed zero rows in each of the 14 retired tables. Catalog review found no dependent views, triggers, policies, or external foreign-key references requiring migration.
+
+The original applied migration remains in the repository as immutable migration history; it is not part of the current runtime data model. New databases apply the historical baseline and then the retirement migration, resulting in the same canonical local-discovery schema.
 
 ## Advisor findings
 
-- Supabase security advisor still reports 14 legacy tables with RLS enabled but no policies. This is a closed posture, not a complete product access model. The nine new local-discovery tables have reviewed public-read policies; retire the legacy tables after the application cutover.
-  - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+- The canonical local-discovery tables retain reviewed RLS policies and least-privilege grants. Continue to review advisor findings against the active schema rather than obsolete application concepts.
 - Supabase security advisor: `public.rls_auto_enable()` was executable by anonymous and authenticated roles. Its grants are revoked; it is now `SECURITY INVOKER`, and the `ensure_rls` event trigger is enabled.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
-- Performance advisor reports unused indexes on the empty legacy schema. Do not prune them before the schema replacement plan is finalized.
 
-## Migration-history drift
-
-The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch has a local file for each remote migration version. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) were created outside the tracked migration chain; a staged migration `20261029020000_retire_legacy_business_services_schema.sql` removes all 14 empty legacy business/service tables and their unused enum types so fresh and live databases can converge. Its version is intentionally later than the latest applied migration `20261029014857`.
-
-The retirement migration `20261029020000_retire_legacy_business_services_schema.sql` has been committed to the branch but has **not** been applied to the live project. Apply it only after the hyperlocal-only application version is deployed and the old production route/form dependency check is complete. The underlying `supabase_admin` default ACL remains unresolved even though the new-object DDL guard mitigates its effective impact.
-
-## Rules for the new local-discovery schema
+## Rules for the active local-discovery schema
 
 1. Keep source records, factual verification, publication status, and sponsorship status separate.
-2. No public read/write grants by default. Explicitly grant only what a reviewed endpoint/view needs.
-3. RLS must be enabled and the policy matrix tested for every exposed table.
-4. Public place/guide reads must expose only published, canonical records.
-5. Never expose internal editorial notes or correction workflow data through a broad `select *` query.
-6. Public writes should use narrow validation and a specific use case; anonymous users must not create or edit canonical place/guide records.
-7. Do not drop legacy tables until their dependencies and any non-database consumers have been checked.
-8. Re-run Supabase security advisors after every schema/access migration and test intended anonymous/authenticated behavior.
+2. Use explicit least-privilege grants and RLS for exposed tables.
+3. Public place/guide reads expose only published, canonical records.
+4. Never expose internal editorial notes or correction workflow data through broad queries.
+5. Anonymous users cannot create or edit canonical place/guide records.
+6. Re-run Supabase security advisors after schema/access changes and verify intended anonymous/authenticated behavior.
 
 ## Related platform change
 
@@ -153,7 +147,7 @@ Supabase announced that new tables in the public schema will no longer be expose
 
 - Follow-up hardening: category SELECT policy is deliberately non-recursive (`is_active` only); place-category visibility still requires the associated place and neighborhood to be published. This avoids cyclic RLS policy evaluation between the two tables.
 
-- Added covering indexes for the composite `place_facts(source_id, place_id)` foreign key and `places.neighborhood_id` after the Supabase performance advisor identified the missing coverage. The advisor still reports unused indexes on empty legacy/new tables; do not prune those until the legacy schema retirement and real query patterns are known.
+- Added covering indexes for the composite `place_facts(source_id, place_id)` foreign key and `places.neighborhood_id` after the Supabase performance advisor identified the missing coverage. Reassess index usage against real local-discovery query patterns before pruning.
 
 
 ## Publication integrity hardening — 29 October 2026
@@ -168,4 +162,4 @@ Applied live migration `20261029014857_require_reviewed_guides_and_preserve_publ
 - Rollback-only regression checks were executed against the live project. Publication without source evidence was rejected; deleting the last current fact/source/place relationship and unpublishing a place still used by a published guide were rejected. All test records were rolled back and a follow-up query confirmed zero test records remained.
 - Verified via catalog privilege checks that anonymous users cannot insert/update/delete place records and cannot select `internal_notes` from place sources, place facts, or guide sources. The four new trigger helper functions are not executable by `anon`.
 
-This does not resolve the separate underlying `supabase_admin` default-ACL issue, and it does not authorize applying the staged legacy-table retirement migration.
+This does not resolve the separate underlying `supabase_admin` default-ACL issue. The legacy-table retirement was subsequently applied and verified; its matching SQL migration file is committed under `supabase/migrations/` and synchronized with the live migration history.
