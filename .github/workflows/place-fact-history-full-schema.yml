@@ -1,0 +1,74 @@
+name: Full-schema place fact history regression
+
+on:
+  push:
+    branches:
+      - test/place-fact-history-postgres-ci
+  pull_request:
+    branches:
+      - main
+      - foundation/place-fact-history-reconciled
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/tests/place-fact-history.sql"
+      - ".github/workflows/place-fact-history-full-schema.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-schema-regression:
+    name: Replay repository migrations on isolated PostgreSQL 17
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dcircle_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dcircle_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+
+      - name: Bootstrap Supabase API roles in isolated database
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d dcircle_test <<'SQL'
+          CREATE ROLE anon NOLOGIN;
+          CREATE ROLE authenticated NOLOGIN;
+          CREATE ROLE service_role NOLOGIN;
+          SQL
+
+      - name: Replay all repository migrations in timestamp order
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -euo pipefail
+          for migration in $(find supabase/migrations -maxdepth 1 -type f -name '*.sql' | sort); do
+            echo "::group::Applying $migration"
+            psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d dcircle_test -f "$migration"
+            echo "::endgroup::"
+          done
+
+      - name: Run rollback-only place-fact history regression
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d dcircle_test \
+            -f supabase/tests/place-fact-history.sql
