@@ -95,9 +95,17 @@ function assertSchemaType(html, label, expectedTypes) {
 function assertCanonicalEntityIds(html, path) {
   const expectedUrl = canonicalUrl(path);
   const blocks = getJsonLd(html, path);
-  const entityIds = blocks.flatMap((block) => block["@graph"] ?? [block]).map((node) => node["@id"]).filter((value) => typeof value === "string");
+  const schemaNodes = blocks.flatMap((block) => block["@graph"] ?? [block]);
+  const pageNodes = schemaNodes.filter((node) => {
+    const types = Array.isArray(node["@type"]) ? node["@type"] : [node["@type"]];
+    if (path.startsWith("/places/")) {
+      return types.some((type) => ["Restaurant", "BarOrPub", "LocalBusiness"].includes(type));
+    }
+    return !types.some((type) => ["Organization", "WebSite"].includes(type));
+  });
+  const entityIds = pageNodes.map((node) => node["@id"]).filter((value) => typeof value === "string");
 
-  assert.ok(entityIds.length > 0, `Missing stable JSON-LD @id on ${path}`);
+  assert.ok(entityIds.length > 0, `Missing page-specific JSON-LD @id on ${path}`);
   for (const entityId of entityIds) {
     const parsed = new URL(entityId, canonicalBase);
     assert.equal(parsed.origin, canonicalBase.origin, `JSON-LD @id must use canonical origin on ${path}`);
@@ -113,7 +121,7 @@ function assertCanonicalEntityIds(html, path) {
     assert.ok(!parsed.href.toLowerCase().includes("praveenyadav"), `Personal-name URL is forbidden on ${path}`);
   }
 
-  for (const block of blocks.flatMap((item) => item["@graph"] ?? [item])) {
+  for (const block of pageNodes) {
     const mainEntity = block.mainEntityOfPage;
     const mainEntityId = typeof mainEntity === "string" ? mainEntity : mainEntity && typeof mainEntity === "object" ? mainEntity["@id"] : undefined;
     if (typeof mainEntityId === "string") {
@@ -210,7 +218,9 @@ const socialImageUrl = new URL(ogImage, canonicalBase);
 const socialImageResponse = await getResponse(new URL(socialImageUrl.pathname + socialImageUrl.search, base));
 assert.equal(socialImageResponse.status, 200, "Generated social preview image must return HTTP 200.");
 assert.ok((socialImageResponse.headers.get("content-type") ?? "").toLowerCase().includes("image/png"), "Generated social preview must return PNG.");
-assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
+assert.ok(homepage.includes("Featured guide"), "Homepage should use neutral featured-guide wording.");
+assert.ok(!homepage.includes("Our first published guide"), "Homepage must not use stale first-guide wording.");
+assert.ok(homepage.includes(guidePath), "Homepage should link to the dinner guide.");
 assert.ok(homepage.includes(neighborhoodPath), "Homepage should link to the eligible Deep Ellum neighborhood page.");
 assert.ok(homepage.includes(explorePath), "Homepage should link to the editorial explore hub.");
 assert.ok(!homepage.toLowerCase().includes("php rescue"), "Homepage must not promote retired PHP services.");
