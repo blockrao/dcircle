@@ -9,6 +9,7 @@ DECLARE
   temporary_slug text;
   alias_count integer;
   rejected_reuse boolean := false;
+  deletion_blocked boolean := false;
 BEGIN
   SELECT id, slug
     INTO target_id, original_slug
@@ -57,12 +58,23 @@ BEGIN
   BEGIN
     INSERT INTO public.places (slug, name, publication_status)
     VALUES (temporary_slug, 'Slug reuse regression fixture', 'draft');
-  EXCEPTION WHEN raise_exception THEN
+  EXCEPTION WHEN SQLSTATE 'P0001' THEN
     rejected_reuse := true;
   END;
 
   IF NOT rejected_reuse THEN
     RAISE EXCEPTION 'A new place was allowed to reuse a historical slug';
+  END IF;
+
+  -- Deleting the entity must not erase its permanent URL reservation.
+  BEGIN
+    DELETE FROM public.places WHERE id = target_id;
+  EXCEPTION WHEN foreign_key_violation THEN
+    deletion_blocked := true;
+  END;
+
+  IF NOT deletion_blocked THEN
+    RAISE EXCEPTION 'A place with historical slugs was allowed to be deleted';
   END IF;
 
   SELECT count(*) INTO alias_count
