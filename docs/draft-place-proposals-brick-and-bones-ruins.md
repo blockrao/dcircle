@@ -163,3 +163,44 @@ After approval:
 7. Keep records unpublished until all profile, source, fact, internal-link, structured-data and route checks pass.
 
 **No production database writes, publication, deployment, or configuration changes are authorized by this document.**
+
+
+---
+
+## Follow-up verification — 30 October 2026
+
+A further official-source review was completed after the initial proposal.
+
+### Ruins — official page body reconfirmed; discrepancy remains
+
+The current official homepage was rechecked. Its body text explicitly states:
+- Kitchen Tuesday–Thursday: 4 p.m.–10 p.m.
+- Kitchen Friday: 4 p.m.–2 a.m.
+- Kitchen Saturday–Sunday: 2 p.m.–2 a.m.
+- Venue is 21+ after 9 p.m.
+- Reservations are not required; walk-ins are welcome.
+
+The same page's compressed header still displays an abbreviated schedule resembling “4P–2A WedS–Fri / 2P–2A Sat–Sun”, which does not cleanly match the body statement. The body paragraph is the clearest official statement, but this is not enough to erase the source inconsistency. **Do not mark the kitchen-hours fact as fully publication-ready until the discrepancy is resolved or the venue confirms the schedule.** Retain the 21+ after 9 p.m. statement verbatim in any eventual profile, subject to confirmation of scope.
+
+Evidence reviewed:
+- https://www.ruinsdeepellum.com/ (official homepage; body schedule and 21+ statement)
+- https://www.ruinsdeepellum.com/menu
+- https://www.ruinsdeepellum.com/food-and-drink
+
+### Brick & Bones — kitchen cutoff remains unverified
+
+A targeted search of the official domain and current location information did not produce an explicit, reliable kitchen last-call statement. The official published venue hours must not be converted into a kitchen-hours claim. No third-party listing is being used to fill this gap.
+
+**Required next action:** obtain direct confirmation from the venue (phone +1 469-914-6776) of the last food order by day, and ask whether the published 2 a.m. close applies to the kitchen or only the venue. Until then, omit any post-10 p.m. food-service promise from its facts and profile copy.
+
+### Record-creation decision
+
+- Ruins: candidate remains suitable for a draft profile, but kitchen-hours and age-rule details should remain clearly qualified/unverified until the discrepancy and scope are resolved.
+- Brick & Bones: candidate remains suitable for a draft profile, but no kitchen-hours fact may be created from venue hours.
+- No Supabase writes were made in this follow-up.
+- No publication, deployment, schema change, or configuration change was made.
+- Existing PR #49 remains a documentation-only proposal; it has not been merged.
+
+### Editorial consequence
+
+The after-10 p.m. guide must not present either venue as a guaranteed late-night food option until the exact food-service cutoff is confirmed. A venue's advertised closing time is not evidence that its kitchen is still taking orders.
