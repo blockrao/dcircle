@@ -30,14 +30,19 @@ async function getPage(pathOrUrl) {
 }
 
 const wwwResponse = await getResponse(wwwBase);
-assert.ok(
-  [301, 308].includes(wwwResponse.status),
-  `www hostname must permanently redirect to the canonical apex origin; got HTTP ${wwwResponse.status}`,
-);
+assert.ok([301, 308].includes(wwwResponse.status), `www hostname must permanently redirect; got HTTP ${wwwResponse.status}`);
 const wwwDestination = new URL(wwwResponse.headers.get("location") ?? "", wwwBase);
 assert.equal(wwwDestination.origin, canonicalBase.origin, "www hostname must redirect to the canonical apex origin.");
 assert.equal(wwwDestination.pathname, "/", "www homepage must redirect to the apex homepage.");
 assert.equal(wwwDestination.protocol, "https:", "www hostname must redirect to HTTPS.");
+
+const wwwPathProbe = new URL("/explore?redirect_probe=1", wwwBase);
+const wwwPathResponse = await getResponse(wwwPathProbe);
+assert.ok([301, 308].includes(wwwPathResponse.status), "www deep paths must use a permanent redirect.");
+const wwwPathDestination = new URL(wwwPathResponse.headers.get("location") ?? "", wwwBase);
+assert.equal(wwwPathDestination.origin, canonicalBase.origin, "www deep paths must redirect to the apex origin.");
+assert.equal(wwwPathDestination.pathname, "/explore", "www redirect must preserve the request path.");
+assert.equal(wwwPathDestination.search, "?redirect_probe=1", "www redirect must preserve the query string.");
 
 function canonicalUrl(path) {
   return new URL(path, canonicalBase).href;
@@ -77,8 +82,8 @@ function getJsonLd(html, label) {
 
 function assertSchemaType(html, label, expectedTypes) {
   const blocks = getJsonLd(html, label);
-  const types = blocks.flatMap((block) => {
-    const value = block["@type"];
+  const types = blocks.flatMap((block) => block["@graph"] ?? [block]).flatMap((node) => {
+    const value = node["@type"];
     return Array.isArray(value) ? value : value ? [value] : [];
   });
   assert.ok(
@@ -90,9 +95,17 @@ function assertSchemaType(html, label, expectedTypes) {
 function assertCanonicalEntityIds(html, path) {
   const expectedUrl = canonicalUrl(path);
   const blocks = getJsonLd(html, path);
-  const entityIds = blocks.map((block) => block["@id"]).filter((value) => typeof value === "string");
+  const schemaNodes = blocks.flatMap((block) => block["@graph"] ?? [block]);
+  const pageNodes = schemaNodes.filter((node) => {
+    const types = Array.isArray(node["@type"]) ? node["@type"] : [node["@type"]];
+    if (path.startsWith("/places/")) {
+      return types.some((type) => ["Restaurant", "BarOrPub", "LocalBusiness"].includes(type));
+    }
+    return !types.some((type) => ["Organization", "WebSite"].includes(type));
+  });
+  const entityIds = pageNodes.map((node) => node["@id"]).filter((value) => typeof value === "string");
 
-  assert.ok(entityIds.length > 0, `Missing stable JSON-LD @id on ${path}`);
+  assert.ok(entityIds.length > 0, `Missing page-specific JSON-LD @id on ${path}`);
   for (const entityId of entityIds) {
     const parsed = new URL(entityId, canonicalBase);
     assert.equal(parsed.origin, canonicalBase.origin, `JSON-LD @id must use canonical origin on ${path}`);
@@ -108,7 +121,7 @@ function assertCanonicalEntityIds(html, path) {
     assert.ok(!parsed.href.toLowerCase().includes("praveenyadav"), `Personal-name URL is forbidden on ${path}`);
   }
 
-  for (const block of blocks) {
+  for (const block of pageNodes) {
     const mainEntity = block.mainEntityOfPage;
     const mainEntityId = typeof mainEntity === "string" ? mainEntity : mainEntity && typeof mainEntity === "object" ? mainEntity["@id"] : undefined;
     if (typeof mainEntityId === "string") {
@@ -189,7 +202,25 @@ const placePaths = [
 const homepage = await getPage("/");
 assertCanonical(homepage, canonicalUrl("/"));
 assertPageMetadata(homepage, "/");
-assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
+assertSchemaType(homepage, "/", ["Organization", "WebSite"]);
+const homepageSchemas = getJsonLd(homepage, "/").flatMap((block) => block["@graph"] ?? [block]);
+const organizationSchema = homepageSchemas.find((node) => node["@type"] === "Organization");
+const websiteSchema = homepageSchemas.find((node) => node["@type"] === "WebSite");
+assert.equal(organizationSchema?.["@id"], "https://dallascircle.com/#organization", "Homepage Organization schema must use the canonical identity.");
+assert.equal(websiteSchema?.publisher?.["@id"], "https://dallascircle.com/#organization", "WebSite publisher must reference the canonical Organization identity.");
+const homepageMeta = homepage.match(/<meta\b[^>]*>/gi) ?? [];
+const homepageMetaAttributes = homepageMeta.map(getTagAttributes);
+const ogImage = homepageMetaAttributes.find((attributes) => attributes.property?.toLowerCase() === "og:image")?.content;
+const twitterImage = homepageMetaAttributes.find((attributes) => attributes.name?.toLowerCase() === "twitter:image")?.content;
+assert.ok(ogImage, "Homepage must expose an Open Graph image.");
+assert.ok(twitterImage, "Homepage must expose a Twitter image.");
+const socialImageUrl = new URL(ogImage, canonicalBase);
+const socialImageResponse = await getResponse(new URL(socialImageUrl.pathname + socialImageUrl.search, base));
+assert.equal(socialImageResponse.status, 200, "Generated social preview image must return HTTP 200.");
+assert.ok((socialImageResponse.headers.get("content-type") ?? "").toLowerCase().includes("image/png"), "Generated social preview must return PNG.");
+assert.ok(homepage.includes("Featured guide"), "Homepage should use neutral featured-guide wording.");
+assert.ok(!homepage.includes("Our first published guide"), "Homepage must not use stale first-guide wording.");
+assert.ok(homepage.includes(guidePath), "Homepage should link to the dinner guide.");
 assert.ok(homepage.includes(neighborhoodPath), "Homepage should link to the eligible Deep Ellum neighborhood page.");
 assert.ok(homepage.includes(explorePath), "Homepage should link to the editorial explore hub.");
 assert.ok(!homepage.toLowerCase().includes("php rescue"), "Homepage must not promote retired PHP services.");
