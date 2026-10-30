@@ -265,6 +265,16 @@ for (const path of ["/", "/about", "/faq", explorePath, guidePath, neighborhoodP
   assert.ok(sitemapPaths.has(path), `Sitemap should include required published route ${path}`);
 }
 
+const guideSitemapPaths = [...sitemapPaths].filter((path) => path.startsWith("/guides/"));
+assert.ok(guideSitemapPaths.length >= 2, `Expected both published guide pages in sitemap; found ${guideSitemapPaths.length}`);
+for (const path of guideSitemapPaths) {
+  const html = await getPage(path);
+  assertCanonical(html, canonicalUrl(path));
+  assertPageMetadata(html, path);
+  assertSchemaType(html, path, ["Article"]);
+  assertCanonicalEntityIds(html, path);
+}
+
 const crawledHtml = new Map();
 const seenTitles = new Map();
 const seenDescriptions = new Map();
