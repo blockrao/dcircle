@@ -36,10 +36,10 @@ LANGUAGE plpgsql
 SET search_path = pg_catalog
 AS $function$
 BEGIN
-  -- Serialize competing claims to a slug across current and historical names.
-  PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(NEW.slug, 0));
-
   IF TG_OP = 'INSERT' THEN
+    -- Serialize competing claims to a new current slug.
+    PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(NEW.slug, 0));
+
     IF EXISTS (
       SELECT 1
       FROM public.place_slug_history h
@@ -51,7 +51,15 @@ BEGIN
   END IF;
 
   IF NEW.slug IS DISTINCT FROM OLD.slug THEN
-    PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(OLD.slug, 0));
+    -- Acquire both slug locks in a deterministic order to avoid deadlocks
+    -- when two concurrent updates attempt to exchange current slugs.
+    IF NEW.slug < OLD.slug THEN
+      PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(NEW.slug, 0));
+      PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(OLD.slug, 0));
+    ELSE
+      PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(OLD.slug, 0));
+      PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(NEW.slug, 0));
+    END IF;
 
     IF EXISTS (
       SELECT 1
