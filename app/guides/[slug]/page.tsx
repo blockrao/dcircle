@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { getEligiblePlaceIds } from "@/lib/publication-eligibility";
+import { placeEntityId } from "@/lib/place-entity";
 import { createPublicSupabaseClient } from "@/lib/supabase";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -123,7 +124,7 @@ export default async function GuidePage({ params }: PageProps) {
       .map((place) => ({
         "@type": "Place",
         // Reuse the immutable entity ID emitted by the canonical profile.
-        "@id": `https://dallascircle.com/id/place/${place.id}`,
+        "@id": placeEntityId(place.id),
         url: `https://dallascircle.com/places/${place.slug}`,
         name: place.name,
       })),
