@@ -11,6 +11,8 @@ on:
     paths:
       - "supabase/migrations/**"
       - "supabase/tests/place-fact-history.sql"
+      - "supabase/tests/publication-integrity.sql"
+      - "supabase/tests/place-slug-history.sql"
       - ".github/workflows/place-fact-history-full-schema.yml"
   workflow_dispatch:
 
@@ -66,9 +68,23 @@ jobs:
             echo "::endgroup::"
           done
 
+      - name: Run rollback-only publication integrity regression
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d dcircle_test \
+            -f supabase/tests/publication-integrity.sql
+
       - name: Run rollback-only place-fact history regression
         env:
           PGPASSWORD: postgres
         run: |
           psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d dcircle_test \
             -f supabase/tests/place-fact-history.sql
+
+      - name: Run rollback-only place slug history regression
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d dcircle_test \
+            -f supabase/tests/place-slug-history.sql
