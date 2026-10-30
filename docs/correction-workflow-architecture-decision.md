@@ -1,6 +1,6 @@
 # DallasCircle — Correction Workflow Architecture Decision
 
-**Status:** Proposed; design review recorded, implementation not yet approved by this document alone  
+**Status:** Accepted operating decision; structured intake intentionally deferred  
 **Date:** 29 October 2026  
 **Scope:** Canonical place facts, reader/business correction intake, editorial review, and public freshness/correction context  
 **Related issue:** [#4 — Complete canonical place model, correction history, and publication integration](https://github.com/blockrao/dcircle/issues/4)  
@@ -125,3 +125,17 @@ It does **not** guarantee search ranking, indexing, rich results, or AI citation
 This is a design decision record only. It does not apply a database migration, change production data, enable a public write route, configure an external provider, or deploy the application.
 
 For the fact-history foundation, prefer an additive migration with a rollback plan and no destructive legacy-table changes. Do not enable structured public intake until the delivery mechanism, spam controls, privacy behavior, and authorization model are explicitly reviewed and tested.
+
+
+## 10. Launch-scope disposition — 30 October 2026
+
+The design has been accepted and the following launch-scope decision is recorded:
+
+- The private before/after fact-history foundation is implemented, migrated to production, and covered by isolated PostgreSQL regression tests.
+- The public correction contact remains the existing `mailto:` flow. It is explicitly a contact mechanism, not a tracked submission or confirmation service.
+- A public database write endpoint, correction queue, reviewer dashboard, and external form/CRM integration are **deferred**. The current product is a small, editor-maintained local guide; no operational evidence yet justifies introducing a public write surface, reporter-data retention, spam infrastructure, and a new authenticated editorial console.
+- A correction received by email is treated as an unverified report. The editor independently checks official/current evidence, updates the source and fact through the existing trusted editorial process only when substantiated, and relies on the private fact-history trigger to preserve before/after values. An email or merchant assertion alone never changes a published fact.
+- Public roles remain read-only. No anonymous or authenticated user can mutate canonical places, sources, facts, guides, or private audit history.
+- Reopen structured intake as a separate product issue only when correction volume, response-time expectations, or multiple-editor operations make a tracked queue necessary. That future work must include server-side abuse controls, privacy/retention rules, reviewer authentication/authorization, status tracking, and end-to-end audit tests before enablement.
+
+This is an intentional scope decision, not a claim that a structured correction queue has been built. It closes the launch-critical canonical model/fact-history requirement while preserving the safer email fallback.
