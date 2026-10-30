@@ -109,34 +109,26 @@ References:
 
 The underlying `supabase_admin` default ACL remains broad by platform design, but current Supabase guidance does not provide a supported project-level fix. **It is not a standalone release blocker after the trigger and actual object grants are verified.** Keep the fail-closed trigger, re-run catalog/advisor checks after database/platform changes, and explicitly review extension-created objects. Do not claim the underlying ACL has been changed, do not disable the trigger, and do not apply the staged legacy-retirement migration until application dependency and release checks are complete.
 
-## Legacy schema still present
+## Current database state
 
-The database still contains empty legacy tables, including `service_leads`, `website_audits`, `leads`, `consultations`, `conversions`, merchant claims/permissions, and the older business/editorial tables. Their application routes/helpers were removed from the feature branch, but the tables have **not** been dropped. Keep this distinction explicit. Table removal should be part of a reviewed schema replacement after dependency and ownership checks, not an untracked destructive change.
+The canonical local-discovery schema is the active application data model. The obsolete business-services tables and their unused enum types have been removed from the live Dallas database by migration `20261030033436_retire_legacy_business_services_schema`. An exact pre-removal count confirmed zero rows in each of the 14 retired tables. Catalog review found no dependent views, triggers, policies, or external foreign-key references requiring migration.
+
+The original applied migration remains in the repository as immutable migration history; it is not part of the current runtime data model. New databases apply the historical baseline and then the retirement migration, resulting in the same canonical local-discovery schema.
 
 ## Advisor findings
 
-- Supabase security advisor still reports 14 legacy tables with RLS enabled but no policies. This is a closed posture, not a complete product access model. The nine new local-discovery tables have reviewed public-read policies; retire the legacy tables after the application cutover.
-  - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+- The canonical local-discovery tables retain reviewed RLS policies and least-privilege grants. Continue to review advisor findings against the active schema rather than obsolete application concepts.
 - Supabase security advisor: `public.rls_auto_enable()` was executable by anonymous and authenticated roles. Its grants are revoked; it is now `SECURITY INVOKER`, and the `ensure_rls` event trigger is enabled.
   - Remediation guidance: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
-- Performance advisor reports unused indexes on the empty legacy schema. Do not prune them before the schema replacement plan is finalized.
 
-## Migration-history drift
-
-The original migration-history mismatch is resolved: the baseline SQL was recovered from the live `supabase_migrations.schema_migrations` record and checked against the repository file. The current branch has a local file for each remote migration version. Four additional empty legacy tables (`leads`, `consultations`, `conversions`, and `messages`) were created outside the tracked migration chain; a staged migration `20261029020000_retire_legacy_business_services_schema.sql` removes all 14 empty legacy business/service tables and their unused enum types so fresh and live databases can converge. Its version is intentionally later than the latest applied migration `20261029014857`.
-
-The retirement migration `20261029020000_retire_legacy_business_services_schema.sql` has been committed to the branch but has **not** been applied to the live project. Apply it only after the hyperlocal-only application version is deployed and the old production route/form dependency check is complete. The underlying `supabase_admin` default ACL remains unresolved even though the new-object DDL guard mitigates its effective impact.
-
-## Rules for the new local-discovery schema
+## Rules for the active local-discovery schema
 
 1. Keep source records, factual verification, publication status, and sponsorship status separate.
-2. No public read/write grants by default. Explicitly grant only what a reviewed endpoint/view needs.
-3. RLS must be enabled and the policy matrix tested for every exposed table.
-4. Public place/guide reads must expose only published, canonical records.
-5. Never expose internal editorial notes or correction workflow data through a broad `select *` query.
-6. Public writes should use narrow validation and a specific use case; anonymous users must not create or edit canonical place/guide records.
-7. Do not drop legacy tables until their dependencies and any non-database consumers have been checked.
-8. Re-run Supabase security advisors after every schema/access migration and test intended anonymous/authenticated behavior.
+2. Use explicit least-privilege grants and RLS for exposed tables.
+3. Public place/guide reads expose only published, canonical records.
+4. Never expose internal editorial notes or correction workflow data through broad queries.
+5. Anonymous users cannot create or edit canonical place/guide records.
+6. Re-run Supabase security advisors after schema/access changes and verify intended anonymous/authenticated behavior.
 
 ## Related platform change
 
