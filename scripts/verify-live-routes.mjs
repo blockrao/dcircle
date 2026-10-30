@@ -189,7 +189,14 @@ const placePaths = [
 const homepage = await getPage("/");
 assertCanonical(homepage, canonicalUrl("/"));
 assertPageMetadata(homepage, "/");
-assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
+assertSchemaType(homepage, "/", ["Organization", "WebSite"]);
+assert.ok(
+  homepage.includes('property="og:image"') && homepage.includes('name="twitter:image"'),
+  "Homepage should expose generated Open Graph and Twitter preview images.",
+);
+assert.ok(homepage.includes("Featured guide"), "Homepage should use neutral featured-guide wording.");
+assert.ok(!homepage.includes("Our first published guide"), "Homepage must not use stale first-guide wording.");
+assert.ok(homepage.includes(guidePath), "Homepage should link to the dinner guide.");
 assert.ok(homepage.includes(neighborhoodPath), "Homepage should link to the eligible Deep Ellum neighborhood page.");
 assert.ok(homepage.includes(explorePath), "Homepage should link to the editorial explore hub.");
 assert.ok(!homepage.toLowerCase().includes("php rescue"), "Homepage must not promote retired PHP services.");
