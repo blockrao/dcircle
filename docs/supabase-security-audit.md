@@ -18,7 +18,7 @@ These findings are a source of unnecessary exposure, but they do not establish t
 
 ## Changes applied and verified
 
-Fourteen migration versions are now represented in the live project and branch. The historical baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). The thirteen subsequent applied migrations are also represented under `supabase/migrations/`; the legacy-retirement migration is staged but not yet applied.
+Fourteen migration versions are now represented in the live project and branch. The historical baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). The twelve subsequent migrations through `20261029014857_require_reviewed_guides_and_preserve_publication_integrity` are represented under `supabase/migrations/`. The live retirement migration `20261030033436_retire_legacy_business_services_schema` was applied directly to the project and recorded in Supabase migration history, but its matching SQL file is not yet present in this repository branch. Do not describe it as staged in the repository.
 
 1. `20261028152728_revoke_legacy_public_schema_grants`
    - Revoked all table privileges from `anon` and `authenticated` across existing public-schema tables.
@@ -57,7 +57,7 @@ Verification after applying these migrations confirmed:
 - `anon` cannot insert places and cannot select internal notes from source/fact tables;
 - place and guide publication gates passed positive and negative checks using temporary rows that were rolled back.
 
-The service role retains the required function privileges. No legacy rows or tables were deleted. The canonical schema now contains the published Deep Ellum neighborhood, three published place profiles, one published guide, and their source/fact/category/guide relationships.
+The service role retains the required function privileges. The 14 retired tables were confirmed to contain zero rows before removal and have since been dropped from the live database. The canonical schema now contains the published Deep Ellum neighborhood, three published place profiles, one published guide, and their source/fact/category/guide relationships.
 
 ## Canonical local-discovery schema implemented
 
@@ -107,7 +107,7 @@ References:
 - A live catalog query confirms all nine canonical local-discovery tables have RLS enabled and one policy each. `anon` has no INSERT, UPDATE, or DELETE privilege on those tables; public SELECT is available on the intended published content tables. Source and relationship tables use column-level SELECT grants, so table-level `has_table_privilege(..., 'SELECT')` can be false even when approved columns are readable.
 - Earlier transaction-rollback regression tests verified that anonymous writes and internal-note reads are denied, publication integrity checks reject invalid changes, and test rows are rolled back.
 
-The underlying `supabase_admin` default ACL remains broad by platform design, but current Supabase guidance does not provide a supported project-level fix. **It is not a standalone release blocker after the trigger and actual object grants are verified.** Keep the fail-closed trigger, re-run catalog/advisor checks after database/platform changes, and explicitly review extension-created objects. Do not claim the underlying ACL has been changed, do not disable the trigger, and do not apply the staged legacy-retirement migration until application dependency and release checks are complete.
+The underlying `supabase_admin` default ACL remains broad by platform design, but current Supabase guidance does not provide a supported project-level fix. **It is not a standalone release blocker after the trigger and actual object grants are verified.** Keep the fail-closed trigger, re-run catalog/advisor checks after database/platform changes, and explicitly review extension-created objects. Do not claim the underlying ACL has been changed or disable the trigger. The legacy-table retirement has since been applied and verified separately; the repository migration-history synchronization remains outstanding.
 
 ## Current database state
 
@@ -145,7 +145,7 @@ Supabase announced that new tables in the public schema will no longer be expose
 
 - Follow-up hardening: category SELECT policy is deliberately non-recursive (`is_active` only); place-category visibility still requires the associated place and neighborhood to be published. This avoids cyclic RLS policy evaluation between the two tables.
 
-- Added covering indexes for the composite `place_facts(source_id, place_id)` foreign key and `places.neighborhood_id` after the Supabase performance advisor identified the missing coverage. The advisor still reports unused indexes on empty legacy/new tables; do not prune those until the legacy schema retirement and real query patterns are known.
+- Added covering indexes for the composite `place_facts(source_id, place_id)` foreign key and `places.neighborhood_id` after the Supabase performance advisor identified the missing coverage. Reassess index usage against real local-discovery query patterns before pruning.
 
 
 ## Publication integrity hardening — 29 October 2026
@@ -160,4 +160,4 @@ Applied live migration `20261029014857_require_reviewed_guides_and_preserve_publ
 - Rollback-only regression checks were executed against the live project. Publication without source evidence was rejected; deleting the last current fact/source/place relationship and unpublishing a place still used by a published guide were rejected. All test records were rolled back and a follow-up query confirmed zero test records remained.
 - Verified via catalog privilege checks that anonymous users cannot insert/update/delete place records and cannot select `internal_notes` from place sources, place facts, or guide sources. The four new trigger helper functions are not executable by `anon`.
 
-This does not resolve the separate underlying `supabase_admin` default-ACL issue, and it does not authorize applying the staged legacy-table retirement migration.
+This does not resolve the separate underlying `supabase_admin` default-ACL issue. The legacy-table retirement was subsequently applied and verified; its SQL migration file still needs repository synchronization.
