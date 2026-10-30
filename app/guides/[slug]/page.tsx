@@ -122,7 +122,8 @@ export default async function GuidePage({ params }: PageProps) {
       .filter((place): place is NonNullable<typeof place> => Boolean(place))
       .map((place) => ({
         "@type": "Place",
-        "@id": `https://dallascircle.com/places/${place.slug}`,
+        // Reuse the immutable entity ID emitted by the canonical profile.
+        "@id": `https://dallascircle.com/id/place/${place.id}`,
         url: `https://dallascircle.com/places/${place.slug}`,
         name: place.name,
       })),
