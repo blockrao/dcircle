@@ -1,0 +1,92 @@
+name: Production release verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-release-verification
+  cancel-in-progress: false
+
+jobs:
+  production-verification:
+    name: Verify live site and production Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify production route, SEO, sitemap, and internal-link coverage
+        env:
+          SITE_URL: https://dallascircle.com
+          CANONICAL_SITE_URL: https://dallascircle.com
+        run: node scripts/verify-live-routes.mjs
+
+      - name: Verify production Supabase credentials are present
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          for name in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing required Actions secret: $name"
+              exit 1
+            fi
+          done
+
+      - name: Run read-only publication integrity audit
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: node scripts/audit-publication-integrity.mjs | tee publication-integrity-report.json
+
+      - name: Run read-only discovery coverage audit
+        if: always()
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "${NEXT_PUBLIC_SUPABASE_URL:-}" ] || [ -z "${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}" ]; then
+            echo "::warning::Supabase credentials unavailable; discovery coverage audit was not run."
+            exit 1
+          fi
+          node scripts/audit-discovery-data-coverage.mjs | tee discovery-coverage-report.json
+
+      - name: Upload production verification reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-release-verification-reports
+          path: |
+            publication-integrity-report.json
+            discovery-coverage-report.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Record Cloudflare deployment verification boundary
+        if: always()
+        run: |
+          {
+            echo "## Cloudflare Workers Builds deployment"
+            echo
+            echo "- This workflow checks the live public origin and production Supabase through the public/anon key."
+            echo "- It does not have Cloudflare account credentials and cannot independently inspect Workers Builds deployment metadata."
+            echo "- Before closing release gate #38, verify in Cloudflare Dashboard > Workers & Pages > dcircle > Deployments that the active production deployment is successful and corresponds to the intended `main` commit."
+            echo "- Expected repository commit for this run: `$(git rev-parse HEAD)`."
+            echo "- Do not treat this workflow's success as proof of the Cloudflare deployment's source commit."
+          } >> "$GITHUB_STEP_SUMMARY"
