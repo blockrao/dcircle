@@ -31,15 +31,17 @@ Expand into broader local topics and localities—such as food and drink, arts a
 
 ## 3. Roadmap and phase gates
 
-### Phase 0 — Prove the current foundation (active; release blocker)
+### Phase 0 — Prove the current foundation (substantially complete; production verification remains open)
 1. Reconcile local Git state safely; do not discard uncommitted work.
 2. Run current branch install, lint/type checks, and production build.
 3. Run the live-route verifier against a local server and fix actual failures: HTTP status, canonical URLs, title/description uniqueness, JSON-LD parity, robots, sitemap eligibility, internal links, redirects, source/correction context.
 4. Verify the supported Supabase permission posture: confirm the `supabase_admin` default ACL is platform-managed and not changeable through the project `postgres` role; verify the enabled fail-closed DDL trigger, `postgres` defaults, canonical-table RLS/policies, and actual anonymous grants. Current catalog checks passed on 29 October 2026. Keep the ACL limitation documented, recheck after platform/schema changes, and do not treat an unsupported role-owner/superuser change as a required release task.
-5. Keep the legacy-table retirement migration staged until route/form/dependency checks and release gates pass.
+5. Legacy-table retirement is complete: 14 empty tables and six unused enum types were removed from live Supabase after row-count and dependency checks; the exact applied migration is synchronized in `main`. Do not reapply it.
 6. Do not deploy or merge based solely on a successful build.
 
-**Exit criteria:** reproducible local checks pass; failures are fixed or explicitly recorded; security blocker is resolved or formally accepted; PR evidence distinguishes local, CI, preview, and production results.
+**Progress/evidence:** PR #46 merged to `main`; its quality workflow passed lint, production build, Supabase secret verification, publication-integrity audit, discovery-coverage audit, local production-route/SEO/internal-link verification, and Cloudflare Worker bundle build. The separate production route workflow's live-site step was skipped, so production HTTP behavior is not yet verified by that run. The `supabase_admin` platform-managed default ACL remains documented and is mitigated by the enabled fail-closed DDL trigger and verified object grants; it is not a standalone blocker.
+
+**Exit criteria:** local/CI foundation checks pass (achieved); production HTTP/preview behavior is separately verified; failures are fixed or explicitly recorded; PR evidence distinguishes local, CI, preview, and production results.
 
 ### Phase 1 — Canonical content and publication integrity
 1. Lock canonical merchant/location URL conventions after auditing existing routes.
@@ -117,9 +119,9 @@ Do not use raw URL count, schema count, AI-generated word count, or social follo
 
 ## 6. Immediate work queue
 
-1. **First:** close the local verification and Supabase permission release gates; no deployment shortcut.
-2. **Second:** reconcile route/data implementation with the canonical merchant contract and shared publication eligibility.
-3. **Third:** run and record route/SEO checks, fix actual defects, and update the PR with verified evidence.
+1. **First:** local/CI verification and the supported Supabase permission posture are now evidenced; complete the separate production HTTP verification without treating a skipped check as a pass.
+2. **Second (active):** implement and verify the canonical place-profile identity contract, including immutable entity IDs, historical slug redirects, and shared references across profiles, guides, and locality pages.
+3. **Third:** reconcile the broader route/data implementation with the canonical merchant contract and shared publication eligibility; fix any defects surfaced by the expanded verifier.
 4. **Fourth:** complete the first integrated Deep Ellum discovery journey and core editorial inventory.
 5. **Fifth:** instrument baseline behavior and run the focused user/merchant pilot.
 6. **Later:** founder profiles, broader locality/topic expansion, monetization experiments, and advanced features.
