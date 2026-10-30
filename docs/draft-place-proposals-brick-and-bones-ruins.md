@@ -246,3 +246,39 @@ Sources rechecked:
 - Brick & Bones: profile may describe its official late-night positioning and venue hours, but must not claim kitchen service until 2 a.m. without direct confirmation.
 - Ruins: official body-published day-specific kitchen hours can be retained as source-backed candidate facts, with the header/body ambiguity documented. For an after-10 p.m. guide, seek direct confirmation first and make the 21+ after-9 p.m. restriction prominent.
 - No production writes, publication, or deployment have been performed.
+
+
+## Production draft-record creation — 30 October 2026
+
+The two proposals below have now been created in the production Supabase database as draft-only records. A duplicate check covering canonical names, candidate slugs, official domains, and current addresses returned no existing place rows before insertion. The resulting rows and their relations were read back and verified after the write.
+
+### Brick & Bones
+- Place UUID: `6113d7bf-ef6c-42b5-bdc4-e5dff0896ed9`
+- Slug: `brick-and-bones-deep-ellum`
+- Status: `draft`
+- Address: 2651 Commerce St, Dallas, TX 75226
+- Phone: +1 469-914-6776
+- Sources: official location page and official menu page
+- Facts: verified address and phone, each linked to the official location source
+- Categories: Restaurants (primary), Bars
+- Price level: null
+- Kitchen hours: not recorded; venue closing time must not be substituted for kitchen last call
+
+### Ruins
+- Place UUID: `cd8c0e1d-c1e2-4f98-8629-754aa331c0ba`
+- Slug: `ruins-deep-ellum`
+- Status: `draft`
+- Address: 2653 Commerce St, Dallas, TX 75226
+- Phone: +1 972-707-0607
+- Sources: official website and official menu page
+- Facts: verified address and phone, each linked to the official website source
+- Categories: Restaurants (primary), Bars
+- Price level: null
+- Kitchen hours: not recorded; the official page's header/body schedule discrepancy remains unresolved
+
+### Verification and safeguards
+- Each record has 2 official source rows, 2 verified fact rows and 2 category links.
+- Both have `price_level = NULL` and `publication_status = draft`.
+- No guide relationships were created.
+- No public content, schema, RLS policy, or deployment was changed.
+- Do not publish either record until volatile facts, copy, official next-step links, image rights/quality, profile rendering, JSON-LD, canonical metadata, sitemap eligibility, and route verification have been reviewed.
