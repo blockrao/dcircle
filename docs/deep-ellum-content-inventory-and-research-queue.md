@@ -175,3 +175,17 @@ A second read-only production query checked candidate names/official domains and
 6. Draft the after-10 p.m. guide only after these checks, using a day/time matrix rather than a generic claim that all listed kitchens are open late.
 
 No database writes, content publication, deployment, or production configuration changes were performed in this follow-up.
+
+
+## 9. Draft records created in production — 30 October 2026
+
+The first two candidates were inserted into the production Supabase project as **draft-only** place records after exact-name, canonical-slug, official-domain, and current-address duplicate checks returned no matches. The records were re-read after insertion and their related source, fact, and category counts were verified.
+
+| Candidate | Place UUID | Canonical draft slug | Sources | Verified facts | Categories | Price level |
+|---|---|---|---:|---:|---|---|
+| Brick & Bones | `6113d7bf-ef6c-42b5-bdc4-e5dff0896ed9` | `brick-and-bones-deep-ellum` | 2 | 2 | Restaurants (primary), Bars | Null |
+| Ruins | `cd8c0e1d-c1e2-4f98-8629-754aa331c0ba` | `ruins-deep-ellum` | 2 | 2 | Restaurants (primary), Bars | Null |
+
+The verified facts are limited to the current official address and phone number. Official menu sources are recorded for later review. No kitchen-hours facts or price levels were inserted. The Ruins schedule discrepancy and the Brick & Bones distinction between venue closing and kitchen last call remain open research blockers.
+
+Both records remain `draft`; neither is public, published, or eligible for guide inclusion until the full editorial and publication-quality checks pass. This is a production data change, but it did not alter the schema or publish content.
