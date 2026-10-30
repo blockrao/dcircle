@@ -4,7 +4,7 @@
 CREATE TABLE public.place_slug_history (
   old_slug text PRIMARY KEY
     CHECK (old_slug ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'),
-  place_id uuid NOT NULL REFERENCES public.places(id) ON DELETE CASCADE,
+  place_id uuid NOT NULL REFERENCES public.places(id) ON DELETE RESTRICT,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -36,6 +36,9 @@ LANGUAGE plpgsql
 SET search_path = pg_catalog
 AS $function$
 BEGIN
+  -- Serialize competing claims to a slug across current and historical names.
+  PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(NEW.slug, 0));
+
   IF TG_OP = 'INSERT' THEN
     IF EXISTS (
       SELECT 1
@@ -48,6 +51,8 @@ BEGIN
   END IF;
 
   IF NEW.slug IS DISTINCT FROM OLD.slug THEN
+    PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(OLD.slug, 0));
+
     IF EXISTS (
       SELECT 1
       FROM public.place_slug_history h
