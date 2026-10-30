@@ -200,13 +200,14 @@ const organizationSchema = homepageSchemas.find((node) => node["@type"] === "Org
 const websiteSchema = homepageSchemas.find((node) => node["@type"] === "WebSite");
 assert.equal(organizationSchema?.["@id"], "https://dallascircle.com/#organization", "Homepage Organization schema must use the canonical identity.");
 assert.equal(websiteSchema?.publisher?.["@id"], "https://dallascircle.com/#organization", "WebSite publisher must reference the canonical Organization identity.");
-const homepageMeta = homepage.match(/<meta\\b[^>]*>/gi) ?? [];
+const homepageMeta = homepage.match(/<meta\b[^>]*>/gi) ?? [];
 const homepageMetaAttributes = homepageMeta.map(getTagAttributes);
 const ogImage = homepageMetaAttributes.find((attributes) => attributes.property?.toLowerCase() === "og:image")?.content;
 const twitterImage = homepageMetaAttributes.find((attributes) => attributes.name?.toLowerCase() === "twitter:image")?.content;
 assert.ok(ogImage, "Homepage must expose an Open Graph image.");
 assert.ok(twitterImage, "Homepage must expose a Twitter image.");
-const socialImageResponse = await getResponse(new URL(ogImage, canonicalBase));
+const socialImageUrl = new URL(ogImage, canonicalBase);
+const socialImageResponse = await getResponse(new URL(socialImageUrl.pathname + socialImageUrl.search, base));
 assert.equal(socialImageResponse.status, 200, "Generated social preview image must return HTTP 200.");
 assert.ok((socialImageResponse.headers.get("content-type") ?? "").toLowerCase().includes("image/png"), "Generated social preview must return PNG.");
 assert.ok(homepage.includes(guidePath), "Homepage should link to the first guide.");
