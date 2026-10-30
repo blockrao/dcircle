@@ -18,7 +18,7 @@ These findings are a source of unnecessary exposure, but they do not establish t
 
 ## Changes applied and verified
 
-Fourteen migration versions are now represented in the live project and branch. The historical baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). The twelve subsequent migrations through `20261029014857_require_reviewed_guides_and_preserve_publication_integrity` are represented under `supabase/migrations/`. The live retirement migration `20261030033436_retire_legacy_business_services_schema` was applied directly to the project and recorded in Supabase migration history, but its matching SQL file is not yet present in this repository branch. Do not describe it as staged in the repository.
+Sixteen migration versions are recorded in the live project: the historical baseline plus fifteen subsequent migrations. The baseline `20261023040126_003_core_business_schema.sql` was recovered from `supabase_migrations.schema_migrations.statements` and verified against the live record; its SQL content matches exactly (the repository file adds only a final newline). Fourteen subsequent migration files, through `20261029014857_require_reviewed_guides_and_preserve_publication_integrity`, are represented under `supabase/migrations/`. The live retirement migration `20261030033436_retire_legacy_business_services_schema` is the fifteenth subsequent migration and was applied directly to the project, but its matching SQL file is not present in this repository branch.
 
 1. `20261028152728_revoke_legacy_public_schema_grants`
    - Revoked all table privileges from `anon` and `authenticated` across existing public-schema tables.
@@ -47,6 +47,8 @@ Fourteen migration versions are now represented in the live project and branch. 
    - Added indexes for the composite place-fact/source foreign key and neighborhood foreign key.
 12. `20261028155619_seed_first_deep_ellum_editorial_slice`
    - Seeded three source-backed place profiles, verified hours/kitchen facts with review dates, one guide, source records, and guide/place relationships.
+13. `20261028161824_harden_public_ddl_default_grants`
+   - Hardened the public-schema DDL event-trigger behavior so new objects default to least-privilege access.
 
 Verification after applying these migrations confirmed:
 - no table-level INSERT/UPDATE/DELETE grants for `anon` or `authenticated` on the canonical content tables; explicit SELECT grants are limited to public content, with column-level projections for source/fact/relationship tables;
