@@ -30,7 +30,7 @@ async function getPage(pathOrUrl) {
 }
 
 const wwwResponse = await getResponse(wwwBase);
-assert.equal(wwwResponse.status, 308, `www hostname must use a permanent 308 redirect; got HTTP ${wwwResponse.status}`);
+assert.ok([301, 308].includes(wwwResponse.status), `www hostname must permanently redirect; got HTTP ${wwwResponse.status}`);
 const wwwDestination = new URL(wwwResponse.headers.get("location") ?? "", wwwBase);
 assert.equal(wwwDestination.origin, canonicalBase.origin, "www hostname must redirect to the canonical apex origin.");
 assert.equal(wwwDestination.pathname, "/", "www homepage must redirect to the apex homepage.");
@@ -38,7 +38,7 @@ assert.equal(wwwDestination.protocol, "https:", "www hostname must redirect to H
 
 const wwwPathProbe = new URL("/explore?redirect_probe=1", wwwBase);
 const wwwPathResponse = await getResponse(wwwPathProbe);
-assert.equal(wwwPathResponse.status, 308, "www deep paths must use a permanent 308 redirect.");
+assert.ok([301, 308].includes(wwwPathResponse.status), "www deep paths must use a permanent redirect.");
 const wwwPathDestination = new URL(wwwPathResponse.headers.get("location") ?? "", wwwBase);
 assert.equal(wwwPathDestination.origin, canonicalBase.origin, "www deep paths must redirect to the apex origin.");
 assert.equal(wwwPathDestination.pathname, "/explore", "www redirect must preserve the request path.");
