@@ -38,6 +38,27 @@ export const metadata: Metadata = {
   },
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://dallascircle.com/#organization",
+      "name": "DallasCircle",
+      "url": "https://dallascircle.com",
+      "description": "Source-backed local guides and practical night-out planning for Deep Ellum, Dallas."
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://dallascircle.com/#website",
+      "url": "https://dallascircle.com",
+      "name": "DallasCircle",
+      "publisher": { "@id": "https://dallascircle.com/#organization" },
+      "inLanguage": "en-US"
+    }
+  ]
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
