@@ -3,7 +3,7 @@ name: Full-schema place fact history regression
 on:
   push:
     branches:
-      - test/place-fact-history-postgres-ci
+      - main
   pull_request:
     branches:
       - main
