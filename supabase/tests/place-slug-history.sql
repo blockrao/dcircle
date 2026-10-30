@@ -1,4 +1,4 @@
--- Regression coverage for permanent place slugs and stable identity.
+-- Regression coverage for permanent place slugs, stable identity, and public RLS.
 -- Run against a disposable database or with the surrounding transaction intact.
 BEGIN;
 
@@ -86,5 +86,81 @@ BEGIN
   END IF;
 END;
 $test$;
+
+-- Seed one published alias and one unpublished alias for role-scoped RLS tests.
+INSERT INTO public.places (slug, name, publication_status, published_at)
+VALUES ('unpublished-rsl-fixture', 'Unpublished RLS fixture', 'draft', NULL);
+
+INSERT INTO public.place_slug_history (old_slug, place_id)
+SELECT 'published-rsl-fixture', id
+FROM public.places
+WHERE slug = 'serious-pizza-deep-ellum';
+
+INSERT INTO public.place_slug_history (old_slug, place_id)
+SELECT 'unpublished-rsl-fixture-old', id
+FROM public.places
+WHERE slug = 'unpublished-rsl-fixture';
+
+-- Anonymous users may read aliases only for published places and cannot write.
+SET LOCAL ROLE anon;
+DO $anon$
+DECLARE
+  visible_count integer;
+  write_blocked boolean := false;
+BEGIN
+  SELECT count(*) INTO visible_count
+  FROM public.place_slug_history
+  WHERE old_slug IN ('published-rsl-fixture', 'unpublished-rsl-fixture-old');
+
+  IF visible_count <> 1 THEN
+    RAISE EXCEPTION 'anon must see exactly the published alias; saw %', visible_count;
+  END IF;
+
+  BEGIN
+    INSERT INTO public.place_slug_history (old_slug, place_id)
+    SELECT 'anon-write-must-fail', id
+    FROM public.places
+    WHERE slug = 'serious-pizza-deep-ellum';
+  EXCEPTION WHEN insufficient_privilege THEN
+    write_blocked := true;
+  END;
+
+  IF NOT write_blocked THEN
+    RAISE EXCEPTION 'anon unexpectedly has write access to place_slug_history';
+  END IF;
+END;
+$anon$;
+RESET ROLE;
+
+-- Authenticated users receive the same public read boundary and no write access.
+SET LOCAL ROLE authenticated;
+DO $authenticated$
+DECLARE
+  visible_count integer;
+  write_blocked boolean := false;
+BEGIN
+  SELECT count(*) INTO visible_count
+  FROM public.place_slug_history
+  WHERE old_slug IN ('published-rsl-fixture', 'unpublished-rsl-fixture-old');
+
+  IF visible_count <> 1 THEN
+    RAISE EXCEPTION 'authenticated must see exactly the published alias; saw %', visible_count;
+  END IF;
+
+  BEGIN
+    INSERT INTO public.place_slug_history (old_slug, place_id)
+    SELECT 'authenticated-write-must-fail', id
+    FROM public.places
+    WHERE slug = 'serious-pizza-deep-ellum';
+  EXCEPTION WHEN insufficient_privilege THEN
+    write_blocked := true;
+  END;
+
+  IF NOT write_blocked THEN
+    RAISE EXCEPTION 'authenticated unexpectedly has write access to place_slug_history';
+  END IF;
+END;
+$authenticated$;
+RESET ROLE;
 
 ROLLBACK;
