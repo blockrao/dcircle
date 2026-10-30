@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 
 const rawBase = process.env.SITE_URL ?? "http://localhost:3000";
 const rawCanonicalBase = process.env.CANONICAL_SITE_URL ?? "https://dallascircle.com";
+const rawWwwBase = process.env.WWW_SITE_URL ?? "https://www.dallascircle.com";
 const base = new URL(rawBase.endsWith("/") ? rawBase : `${rawBase}/`);
 const canonicalBase = new URL(rawCanonicalBase.endsWith("/") ? rawCanonicalBase : `${rawCanonicalBase}/`);
+const wwwBase = new URL(rawWwwBase.endsWith("/") ? rawWwwBase : `${rawWwwBase}/`);
 
-for (const [name, url] of [["SITE_URL", base], ["CANONICAL_SITE_URL", canonicalBase]]) {
+for (const [name, url] of [["SITE_URL", base], ["CANONICAL_SITE_URL", canonicalBase], ["WWW_SITE_URL", wwwBase]]) {
   assert.ok(["http:", "https:"].includes(url.protocol), `${name} must use HTTP or HTTPS.`);
   assert.equal(url.pathname, "/", `${name} must be an origin, without a path prefix.`);
   assert.equal(url.search, "", `${name} must not include a query string.`);
@@ -26,6 +28,16 @@ async function getPage(pathOrUrl) {
   assert.equal(response.status, 200, `${label} should return HTTP 200; got ${response.status}`);
   return response.text();
 }
+
+const wwwResponse = await getResponse(wwwBase);
+assert.ok(
+  [301, 308].includes(wwwResponse.status),
+  `www hostname must permanently redirect to the canonical apex origin; got HTTP ${wwwResponse.status}`,
+);
+const wwwDestination = new URL(wwwResponse.headers.get("location") ?? "", wwwBase);
+assert.equal(wwwDestination.origin, canonicalBase.origin, "www hostname must redirect to the canonical apex origin.");
+assert.equal(wwwDestination.pathname, "/", "www homepage must redirect to the apex homepage.");
+assert.equal(wwwDestination.protocol, "https:", "www hostname must redirect to HTTPS.");
 
 function canonicalUrl(path) {
   return new URL(path, canonicalBase).href;
@@ -345,6 +357,19 @@ for (const path of internalPaths) {
     200,
     `Internal link ${path} must resolve to HTTP 200 within five redirects; got ${response.status} at ${currentUrl.pathname}`,
   );
+}
+
+const historicalPlaceSlug = process.env.HISTORICAL_PLACE_SLUG;
+if (historicalPlaceSlug) {
+  const historicalPath = `/places/${historicalPlaceSlug}`;
+  const historicalResponse = await getResponse(historicalPath);
+  assert.ok(
+    [301, 308].includes(historicalResponse.status),
+    `Historical place slug ${historicalPlaceSlug} should permanently redirect; got ${historicalResponse.status}`,
+  );
+  const historicalDestination = new URL(historicalResponse.headers.get("location") ?? "", base);
+  assert.match(historicalDestination.pathname, /^\/places\/[a-z0-9-]+$/i, "Historical slug must redirect to a current canonical place route.");
+  assert.notEqual(historicalDestination.pathname, historicalPath, "Historical slug must not redirect to itself.");
 }
 
 const retiredPath = "/php-rescue";
