@@ -4,6 +4,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  push:
+    branches: [main]
   schedule:
     - cron: '23 11 * * 1'
 
@@ -30,6 +32,10 @@ jobs:
 
       - name: Check verifier syntax
         run: node --check scripts/verify-live-routes.mjs
+
+      - name: Allow Cloudflare Workers Builds to finish after a main deployment
+        if: github.event_name == 'push'
+        run: sleep 120
 
       - name: Verify the live production site
         if: github.event_name != 'pull_request'
